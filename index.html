@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>鐢佃剳鐭ヨ瘑鐧剧</title><link rel="stylesheet" href="css/global.css">
+<style>
+.community-overlay{display:none;position:fixed;inset:0;background:#0f1117;z-index:200;overflow:hidden}
+.community-overlay.open{display:block}
+.community-header{display:flex;align-items:center;gap:16px;padding:14px 28px;border-bottom:1px solid #2a2d3a;background:#161822}
+.community-header h1{color:#fff;font-size:1.15rem;flex:1}
+.community-header button{background:#7c6ff7;border:none;border-radius:8px;color:#fff;padding:8px 20px;font-weight:600;cursor:pointer;font-size:.88rem}
+.community-header button.close-btn{background:transparent;border:1px solid #2a2d3a;color:#c8ccd4}
+.stage{position:relative;width:100%;height:calc(100vh - 57px)}
+.note{position:absolute;width:240px;background:rgba(22,24,34,.85);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 20px;box-shadow:0 8px 32px rgba(0,0,0,.5);cursor:pointer;transition:transform .3s,box-shadow .3s;animation:float 12s ease-in-out infinite;color:#c8ccd4;user-select:none}
+.note:hover{transform:scale(1.06) rotate(0deg)!important;box-shadow:0 12px 40px rgba(124,111,247,.4);z-index:50;border-color:rgba(124,111,247,.4)}
+.note .author{font-weight:600;font-size:.85rem;margin-bottom:8px}
+.note .body{font-size:.85rem;line-height:1.5;max-height:120px;overflow:hidden}
+.note .time{color:#6b7084;font-size:.7rem;margin-top:10px}
+.note .del-btn{position:absolute;top:8px;right:10px;background:none;border:none;color:#6b7084;cursor:pointer;font-size:.75rem}
+.note .del-btn:hover{color:#ff5252}
+.empty-note{display:flex;align-items:center;justify-content:center;font-size:.85rem;opacity:.15}
+@keyframes float{0%,100%{transform:translate(0,0) rotate(-1deg)}25%{transform:translate(40px,-20px) rotate(1.5deg)}50%{transform:translate(-20px,30px) rotate(-1deg)}75%{transform:translate(-30px,-15px) rotate(0.5deg)}}
+
+.community-header .auth-btn-area{display:flex;align-items:center;gap:8px}
+.tag-filter{border:1px solid #2a2d3a;border-radius:8px;padding:6px 14px;font-size:.82rem;color:#c8ccd4;background:transparent;cursor:pointer}
+.modal{background:#161822;border-radius:16px;padding:28px;width:100%;max-width:400px;border:1px solid #2a2d3a}
+.modal h3{color:#fff;margin:0 0 18px;font-size:1.1rem}
+.modal label{display:block;color:#c8ccd4;margin-bottom:6px;font-size:.85rem}
+.modal input[type=email],.modal input[type=text],.modal textarea{width:100%;background:#0f1117;border:1px solid #2a2d3a;border-radius:10px;padding:12px;color:#e1e4eb;font-size:.9rem;box-sizing:border-box;margin-bottom:14px;outline:none}
+.modal input:focus,.modal textarea:focus{border-color:#7c6ff7}
+.modal textarea{min-height:100px;resize:vertical}
+.modal-btn{display:flex;gap:10px;justify-content:flex-end}
+.modal-btn button{padding:10px 22px;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;border:none}
+.btn-cancel{background:#2a2d3a;color:#c8ccd4}
+.btn-save{background:#7c6ff7;color:#fff}
+</style>
+</head><body>
+<div id="mainPage">
+<header class="topbar"><div class="container">
+  <a href="#" class="logo" onclick="communityClose()">鐢佃剳鐭ヨ瘑鐧剧</a>
+  <nav class="nav">
+    <a href="#" class="active" onclick="communityClose()">棣栭〉</a>
+    <a href="hardware/index.html">纭欢</a>
+    <a href="system/index.html">绯荤粺</a>
+    <a href="software/index.html">杞欢</a>
+    <a href="#" onclick="communityOpen()">绀惧尯</a>
+  </nav>
+  <div class="search-wrapper"><span class="sicon">&#8967;</span><input type="text" id="searchInput" placeholder="鎼滅储鐭ヨ瘑搴?.."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<section class="hero"><div class="container"><h1>鐢佃剳鐭ヨ瘑鐧剧</h1></div></section>
+<section class="section"><div class="container">
+  <h2>鏍稿績鏉垮潡</h2>
+  <div class="cards">
+    <a href="hardware/index.html" class="card"><h3>&#x1f5a5; 鐢佃剳纭欢</h3><p>CPU 路 GPU 路 涓绘澘涓庢満绠?路 鍐呭瓨 路 纭洏 路 鐢垫簮 路 鏁ｇ儹 路 澶栬</p></a>
+    <a href="system/index.html" class="card"><h3>&#x2699; 鎿嶄綔绯荤粺</h3><p>Win10 vs Win11 路 Linux 涓?macOS 路 閿欒浠ｇ爜閫熸煡 路 婵€娲绘柟娉?路 瀹樻柟涓嬭浇</p></a>
+    <a href="software/index.html" class="card"><h3>&#x1f916; 杞欢涓撳尯</h3><p>AI Agent 鍏ラ棬 路 GitHub 寮€婧?路 Adobe 濂椾欢 路 瀹炵敤閾炬帴 路 瀹夊叏闃叉姢</p></a>
+  </div>
+</div></section>
+<div class="footer"><div class="container">鐢佃剳鐭ヨ瘑鐧剧 路 涓汉鐭ヨ瘑浠撳簱 路 浠呬緵鍙傝€?/div></div>
+</div>
+<div class="community-overlay" id="co">
+  <header class="community-header"><h1>&#x1f4ac; 绀惧尯璁ㄨ</h1><button class="close-btn" onclick="communityClose()">&#x2715; 鍏抽棴</button><button onclick="communityPostOpen()">+ 鍙戝笘</button></header>
+  <div id="tagBar" class="tag-bar"></div>
+  <div class="stage" id="stage"></div>
+</div>
+<div class="modal-overlay" id="postModal">
+  <div class="modal"><h3>鍙戣〃鏂拌璁?/h3><input type="text" id="postTag" placeholder="鏍囩锛堝 CPU銆丟PU 绛夛級"><textarea id="postBody" placeholder="鍐欑偣浠€涔?.."></textarea><div class="modal-btn"><button class="btn-cancel" onclick="communityPostClose()">鍙栨秷</button><button class="btn-save" onclick="communityPost()">鍙戝竷</button></div></div>
+</div>
+<script src="js/app.js"></script>
+
+<div class="modal-overlay" id="replyModal">
+  <div class="modal"><h3>馃挰 鍥炲璁ㄨ</h3><input type="hidden" id="replyPostId"><p class="reply-original"><span id="replyPostTag"></span> <span id="replyPostBody"></span></p><div class="reply-list" id="replyList"><div class="reply-empty">鏆傛棤鍥炲锛屾潵鍐欑涓€鏉?/div></div><textarea id="replyInput" placeholder="鍐欏洖澶?.."></textarea><div class="modal-btn"><button class="btn-cancel" onclick="replyClose()">鍏抽棴</button><button class="btn-save" onclick="replyPost()">鍥炲</button></div></div>
+</div>
+<div class="modal-overlay" id="loginModal">
+  <div class="modal"><h3>馃敀 鐧诲綍 / 娉ㄥ唽</h3>
+    <div id="loginStep1">
+      <label>閭鍦板潃</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com">
+      <div class="modal-btn"><button class="btn-cancel" onclick="loginClose()">鍙栨秷</button>
+      <button class="btn-save" onclick="sendLoginCode()">鍙戦€侀獙璇佺爜</button></div>
+    </div>
+    <div id="loginStep2" style="display:none">
+      <p style="margin-bottom:8px;">楠岃瘉鐮佸凡鍙戦€佽嚦 <strong id="loginEmailDisplay"></strong></p>
+      <input type="text" id="loginCode" placeholder="杈撳叆楠岃瘉鐮?>
+      <div class="modal-btn"><button class="btn-cancel" onclick="showLogin()">杩斿洖</button>
+      <button class="btn-save" onclick="verifyLoginCode()">鐧诲叆</button></div>
+    </div>
+  </div>
+</div>
+</body></html>
+

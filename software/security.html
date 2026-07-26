@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>安全与维护 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="../hardware/index.html">硬件</a><a href="../system/index.html">系统</a><a href="index.html" class="active">软件</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">软件</a> / <span>安全与维护</span></div></div>
+<article class="article">
+<h1>安全与维护</h1>
+
+<ul class="tree">
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>🛡 安全软件推荐</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>火绒安全软件</h4><p>国产轻量级杀毒防护软件，弹窗少、不捆绑、资源占用低。内置 HIPS 主机入侵防御系统，可自定义规则拦截捆绑安装和弹窗程序。</p><p>🔗 <a target="_blank" href="https://www.huorong.cn">https://www.huorong.cn</a></p></div>
+    <div class="tree-card"><h4>360 安全卫士</h4><p>国内装机量最大的安全软件之一，集成了病毒查杀、系统优化、漏洞修复和弹窗拦截等功能。</p><p>🔗 <a target="_blank" href="https://www.360.cn">https://www.360.cn</a></p><div class="red-alert"><strong>老司机定律</strong>：如果你能独自删掉 360，说明你不需要 360。如果你不能独自删掉 360，那么你确实需要 360。</div></div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>🦠 常见病毒识别与处理方法</div>
+  <div class="tree-children">
+
+    <div class="tree-card">
+      <h4>🦊 银狐病毒 (Silver Fox)</h4>
+      <table><tr><th>传播方式</th><td>通过微信/QQ/钉钉伪装成发票、合同、工资表等文档发送，实为带宏病毒的 Office 文件或伪装 .exe</td></tr><tr><th>中招表现</th><td>电脑远程被控、鼠标自己动、浏览器密码被窃取、凭空出现新安装的远程控制软件如 AnyDesk / TeamViewer</td></tr></table>
+      <p><strong>怎么观察是否中招：</strong></p>
+      <ol><li>任务管理器 → 进程 → 按 CPU/网络排序 → 有没有叫 svchost.exe 但路径不在 C:\Windows\System32\ 下的？</li><li>打开 msconfig → 启动 → 有没有名称乱码或可疑启动项？</li><li>检查"程序和功能"中是否有突然出现的远程控制软件不是你装的。</li></ol>
+      <p><strong>处理方法：</strong></p>
+      <ol><li>直接拔网线。</li><li>进入 Windows 安全模式（网络禁用模式）。</li><li>火绒全盘查杀 → 高启发模式扫描。</li><li>清除完成后立刻修改所有已登录过的账户密码。</li><li>银狐常留后门，重装系统是最彻底的方式。</li></ol>
+    </div>
+
+    <div class="tree-card">
+      <h4>🐴 木马病毒 (Trojan)</h4>
+      <table><tr><th>传播方式</th><td>伪装成正常文件的恶意代码——游戏修改器、破解补丁、不明来源安装包</td></tr><tr><th>中招表现</th><td>不稳定卡顿、磁盘凭空多出新目录、随机数字命名的进程</td></tr></table>
+      <p><strong>怎么观察：</strong></p>
+      <ol><li>Win+R 输入 shell:startup 看启动目录里有没有不明快捷方式。</li><li>运行 netstat -ano | findstr ESTABLISHED 终端里看不认识的国外 IP 连接，记下 PID 后去任务管理器找对应进程。</li><li>打开 services.msc 查看描述为空或名字乱码的服务——直接禁用。</li></ol>
+      <p><strong>怎么处理：</strong>火绒全盘+专杀扫描 → 用 Autoruns 查遍所有启动项 → 删除后清空 %temp% 和 C:\Windows\Temp。</p>
+    </div>
+
+    <div class="tree-card">
+      <h4>⛏ 挖矿病毒 / CryptoJacking</h4>
+      <table><tr><th>传播方式</th><td>捆绑在盗版游戏安装包/盗版影视软件中，或通过驱动缓存自动植入</td></tr><tr><th>中招表现</th><td>CPU/GPU 持续 90-100% 满载导致噪声满爆——开个记事本都卡。显卡显存始终充满。</td></tr></table>
+      <p><strong>怎么观察：</strong></p>
+      <ol><li>任务管理器一直 100% CPU 满载状态下有没有一个异常名字的进程。</li><li>检查计划任务程序 → 看是不是有触发器每 30 分钟启动一个新进程。</li><li>查找硬盘里找散落的 256MB+ 的整文件最小路径。</li></ol>
+      <p><strong>处理：</strong>火绒开启勒索/挖矿防护→断了网→安全模式在静音查杀。</p>
+    </div>
+
+    <div class="tree-card">
+      <h4>🔒 勒索病毒 (Ransomware)</h4>
+      <table><tr><th>典型症状</th><td>所有文档后缀都变成 .locked / .encrypted / .wannacry 之类，桌面出现英文/中文付款救人通知。</td></tr></table>
+      <p><strong>处理（不要慌）：</strong></p>
+      <ol><li>立即物理断电切断电源！阻止继续加密。</li><li>把尚未加密的一个关键文件备份到空U盘备用。</li><li>去 NoMoreRansom 项目搜索你档后缀对应的解密工具。</li><li>如果 3 小时内无救——不付款——格式化然后恢复最近镜像备份。</li></ol>
+    </div>
+
+    <div class="tree-card">
+      <h4>📢 流氓软件 / 广告弹窗</h4>
+      <table><tr><th>传播方式</th><td>安装文件时跳过自定义选项偷偷捆绑装入整套软件。</td></tr><tr><th>中招表现</th><td>桌面多出各种加速大师、壁纸被换、浏览器跳出带货窗口。</td></tr></table>
+      <p><strong>怎么观察 / 处理：</strong></p>
+      <ol><li>火绒弹窗拦截 → 找到对应可疑推广工具栏。</li><li>打开 appwiz.cpl 按安装日期倒序——能看到最后安装的入侵软件。</li><li>将陌生软件批量卸载。</li><li>以后装任何东西盯着"自定义安装"手动取消所有附带勾选。</li></ol>
+    </div>
+
+  </div>
+</li>
+
+</ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+

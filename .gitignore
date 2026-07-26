@@ -1,0 +1,8 @@
+# .gitignore for computer-knowledge
+node_modules/
+.wrangler/
+.cache/
+.DS_Store
+*.log
+workers/node_modules/
+workers/.wrangler/

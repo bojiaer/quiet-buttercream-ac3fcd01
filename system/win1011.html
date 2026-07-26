@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Windows 10 与 Windows 11 有什么区别 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="../hardware/index.html">硬件</a><a href="index.html">系统</a><a href="../software/index.html">软件</a><a href="#" onclick="communityOpen()">社区</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">系统</a> / <span>Windows 10 vs 11</span></div></div>
+<article class="article">
+<h1>Windows 10 vs Windows 11：从底层到体验的完整对比</h1>
+
+
+<section>
+<h2>1. 用户界面与交互变化</h2>
+<p>Windows 11 进行了视觉重构，引入了圆角窗口，开始菜单居中且改为网格图标，不再有 Win10 的磁贴设计。设置面板也整合成一个现代化的侧边导航界面。</p>
+<p>Windows 10 任务栏在左下角，操作逻辑延续 Win7/8.X 时代的交互模式，兼容性更好。</p>
+</section>
+
+<section>
+<h2>2. 硬件与底层架构差异</h2>
+<table><tr><th>维度</th><th>Windows 10</th><th>Windows 11</th></tr>
+<tr><td>处理器支持</td><td>更广泛兼容早期 CPU</td><td>仅支持第 8 代酷睿 + AMD Ryzen2 以上</td></tr>
+<tr><td>安全氛围</td><td>TPM 2.0 可选</td><td>TPM 2.0 强制要求</td></tr>
+<tr><td>DirectStorage</td><td>不支持</td><td>支持，允许游戏直写显存提高加载速度</td></tr>
+<tr><td>Windows Subsystem for Android</td><td>不支持</td><td>原生支持安卓应用（已取消维护）</td></tr>
+<tr><td>内存密度管理</td><td>基础</td><td>大小核负载优化更进</td></tr>
+</table>
+</section>
+
+<section>
+<h2>3. 性能与兼容性</h2>
+<p>Windows 11 对 Intel 大核/小核架构调度的优化让部分轻薄本在待机场景中功耗更低。DirectStorage 配合 NVMe SSD 降低了游戏纹理加载的压力。但相对多的老旧驱动不支持强制签名策略，可能导致安装失败。</p>
+<p>Windows 10 22H2 更新支持更安全稳定，老旧外设与网银 U 盾的兼容性更好。</p>
+</section>
+
+<section>
+<h2>4. 升级建议</h2>
+<ul>
+  <li>若你玩最新游戏且设备支持 DirectStorage——优先升级 Windows 11。</li>
+  <li>专业领域（比如 CAD 旧版、上古科研仪器驱动）建议保留 Windows 10 LSTC/专业版长期服务。</li>
+  <li>使用 TPM 检测工具确保硬件合格后再升级。</li>
+</ul>
+</section>
+
+<section>
+<h2>5. UEFI 安全策略</h2>
+<p>Win11 默认需要 <strong>Secure Boot</strong> 启用状态，并且必须安装到 GPT 分区表上。如果你的磁盘仍是 MBR 结构，启动时会出现"此 PC 不支持 Windows 11 安装"的错误。</p>
+</section>
+<h2>注意事项</h2>
+<div class="red-alert"><strong>重要提醒</strong>：升级任何操作系统前，强烈建议提前在另一块硬盘完成全量镜像备份。直接从 Win10 原系统升级到 Win11 可能导致软件环境遗留问题（驱动程序重复/注册表碎片化）。</div>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+
+
+

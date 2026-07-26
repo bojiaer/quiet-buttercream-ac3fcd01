@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>电源 PSU - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="index.html">硬件</a><a href="../system/index.html">系统</a><a href="../software/index.html">软件</a><a href="#" onclick="communityOpen()">社区</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">硬件</a> / <span>电源</span></div></div>
+<article class="article">
+<h1>电源 (PSU)</h1>
+
+<ul class="tree">
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>按功率等级划分</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>450W - 550W</h4><p>办公 / 核显主机 (i3 + 集成显卡)。</p></div>
+    <div class="tree-card"><h4>650W - 750W</h4><p>RTX 4060/4070 或 RX 7600/7800 XT 级别的中高端装机。</p></div>
+    <div class="tree-card"><h4>850W - 1200W</h4><p>RTX 4080/4090 / 7900XTX 等顶级配置。</p></div>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>80 Plus 认证等级</div>
+  <div class="tree-children">
+    <div class="tree-card"><table><tr><th>白牌</th><td>≈ 80% 转换效率</td></tr><tr><th>铜牌</th><td>≈ 82-85%</td></tr><tr><th>金牌</th><td>≈ 87-92%（主流推荐）</td></tr><tr><th>铂金</th><td>≈ 92-94%</td></tr><tr><th>钛金</th><td>≈ 94-96%（极致）</td></tr></table></div>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>模组化程度</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>非模组</h4><p>所有线固定缠绕，价格最低但理线困难。</p></div>
+    <div class="tree-card"><h4>半模组</h4><p>主板 24-pin 和 CPU 8-pin 固定，其余 PCIe / SATA 线可拆卸。</p></div>
+    <div class="tree-card"><h4>全模组</h4><p>全部线可拆卸，适合定制线和 ITX 小机箱。</p></div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>电源电容产地与品质</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <h4>🇯🇵 日本电容（日系电容）</h4>
+      <table><tr><th>常见代表</th><td>Rubycon（红宝石）、Nippon Chemi-Con（黑金刚）、Nichicon</td></tr><tr><th>特点</th><td>耐温 105°C、寿命极长、ESR 低、纹波控制优秀</td></tr><tr><th>应用</th><td>多见于高端金牌/铂金牌电源的主电容和 DC-DC 模块</td></tr><tr><th>标识</th><td>外壳印有清晰品牌标志，电容顶部有泄压划痕 K 字形</td></tr></table>
+      <p style="margin-top:6px;color:var(--text-muted);font-size:.85rem;">日系电容是标杆级品质。好的金牌电源主电容几乎必为日系——关系长期输出电压稳定性。</p>
+    </div>
+    <div class="tree-card">
+      <h4>🇹🇼 台湾电容</h4>
+      <table><tr><th>代表</th><td>Teapo（智宝）、Samwha（三和）</td></tr><tr><th>特点</th><td>综合平衡 —— 品质高于大陆普通电容，价格低于日系，中端主流。</td></tr><tr><th>应用</th><td>80+ 铜牌/入门金牌电源的次级 + 输出滤波电容。</td></tr></table>
+    </div>
+    <div class="tree-card">
+      <h4>🇨🇳 大陆电容</h4>
+      <table><tr><th>代表</th><td>华威 (Aishi)、万裕 、 江海</td></tr><tr><th>特点</th><td>性价比高，工程进步很快，但极低单款与极高温度容限弱于日系。</td></tr><tr><th>应用</th><td>入门级非模组电源、适配器、机箱自带库存扇子。优先杂牌。预算不足或低功耗仍可用。</td></tr></table>
+    </div>
+    <div class="red-alert"><strong>辨别技巧</strong>：好电源的初级主电容多为日系（≥ 400V 450V 耐压高容值）。如果有商家混淆写“均高于”，实际问清哪个电容是日本哪个是大陆的，并找拆解图文佐证。</div>
+  </div>
+</li>
+</ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+
+

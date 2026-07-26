@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GitHub 开源平台 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="../hardware/index.html">硬件</a><a href="../system/index.html">系统</a><a href="index.html" class="active">软件</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">软件</a> / <span>GitHub</span></div></div>
+<article class="article">
+<h1>GitHub — 全球最大的开源代码平台</h1>
+
+<ul class="tree">
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>GitHub 是什么</div>
+  <div class="tree-children">
+    <div class="tree-card"><p>GitHub 是微软旗下的全球开源代码托管社区。几乎所有知名开源项目都在上游一个仓库 (repository) 维护。对于学 AI、网页开发的同学来说，这是最可靠的无偿学习资源源——你不需要会写代码也能在浏览自述文件时获益。</p></div>
+  </div>
+</li>
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>核心操作</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>Star（收藏）</h4><p>喜欢的项目加一颗星标，方便以后回看。</p></div>
+    <div class="tree-card"><h4>Fork（叉一叉）</h4><p>把别人的仓库克隆到你自己的账号，自由修改。</p></div>
+    <div class="tree-card"><h4>Pull Request (PR)</h4><p>你修改后向原作者提交改动请求——开源贡献的核心流水线。</p></div>
+    <div class="tree-card"><h4>Issues</h4><p>报告 Bug、请求新特性、与作者团队讨论。</p></div>
+  </div>
+</li>
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>怎样发现好资源</div>
+  <div class="tree-children">
+    <div class="tree-card"><ol><li>搜索带大量 Star 的仓库，<code>awesome-*</code> 专题汇总——比如 <code>awesome-python</code>/<code>awesome-llm</code>。</li><li>找持续维护（近期多次 commit）的社区。</li><li>关注你所在领域的 GitHub Organization 页面。</li></ol></div>
+  </div>
+</li>
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>GitHub Pages — 免费静态网站</div>
+  <div class="tree-children">
+    <div class="tree-card"><p>仓库名设成 <code>你的GitHub名.github.io</code> 就自动变成全球可用的个人网页。你只需上传 HTML/CSS 文件。</p></div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>精选开源项目推荐</div>
+  <div class="tree-children">
+
+    <div class="tree-card">
+      <h4>🎵 GenP — Adobe 激活补丁</h4>
+      <p>GenP 是一个面向 Adobe Creative Cloud 套件的开源补丁工具，可让用户在本地不依赖官方许可证登录的系统，仍然体验到 Photoshop、Premiere、AE 等全部功能。对想学习创意设计又没有购买预算的学生群体是一个很好的学习素材。</p>
+      <p>🔗 <a target="_blank" href="https://github.com/SpoinkyNL/GenP-3">https://github.com/SpoinkyNL/GenP-3</a></p>
+    </div>
+
+    <div class="tree-card">
+      <h4>🧠 LM Studio — 图形化本地大模型管家</h4>
+      <p>和 Ollama 功能类似但提供带桌面窗口的简易应用——无需任何命令行操作。下载模型、选模型、开始对话都可以在一个界面里完成。支持 llama.cpp 作为后端加载，支持使用 GGUF 格式的量化模型，很耐用。</p>
+      <p>🔗 <a target="_blank" href="https://lmstudio.ai">https://lmstudio.ai</a> （＜官网｜Windows/Mac/Linux 全支持）</p>
+    </div>
+
+    <div class="tree-card">
+      <h4>🎨 Stable Diffusion WebUI — 本地 AI 画图（浏览器版）</h4>
+      <p>在浏览器窗口输入描述词，自动渲染图像。只需下载及其脚本即可。GPU 8+ GB 体验最优。</p>
+      <p>🔗 <a target="_blank" href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">https://github.com/AUTOMATIC1111/stable-diffusion-webui</a></p>
+    </div>
+
+    <div class="tree-card">
+      <h4>🔮 ComfyUI — 节点式 AI 作图工作流</h4>
+      <p>相对于上面的 WebUI，ComfyUI 通过自由拖拽节点连线构建 AI 出图流程。想用 LoRA、ControlNet、高清修复、一系列返回回路？全在画布上看得见。适合想要 DIY 出图流程的使用者。</p>
+      <p>🔗 <a target="_blank" href="https://github.com/comfyanonymous/ComfyUI">https://github.com/comfyanonymous/ComfyUI</a></p>
+    </div>
+
+    <div class="tree-card">
+      <h4>🛠 图吧工具箱 — 电脑硬件检测合集</h4>
+      <p>图吧工具箱是国内电脑硬件党必备的一站式检测套件。内置 CPU-Z、GPU-Z、AIDA64、CrystalDiskMark（录像/硬盘/内存综合测试）和 GPU 显卡烤机工具。所有都打包好，不用单独下载。</p>
+      <p>🔗 <a target="_blank" href="https://www.tbtool.cn">https://www.tbtool.cn</a></p>
+    </div>
+
+    <div class="tree-card">
+      <h4>🧩 ImHex — 十六进制文件编辑器</h4>
+      <p>查看二进制文件（exe/固件）内部构造，带解析器。修复损坏文件或发现隐藏结构用得着。</p>
+      <p>🔗 <a target="_blank" href="https://github.com/WerWolv/ImHex">https://github.com/WerWolv/ImHex</a></p>
+    </div>
+
+    <div class="tree-card">
+      <h4>🔊 OBS Studio — 免费直播/录屏/推流</h4>
+      <p>免费开源标准的直播与录制工具。支持多场景框架 + 预设推流到各大平台。</p>
+      <p>🔗 <a target="_blank" href="https://github.com/obsproject/obs-studio">https://github.com/obsproject/obs-studio</a></p>
+    </div>
+
+    <div class="tree-card">
+      <h4>📁 EverythingToolbar — 秒级全盘文件搜索</h4>
+      <p>在 Windows 任务栏嵌入微秒级的全盘文件检索在线，逐字出文件速度极高。</p>
+      <p>🔗 <a target="_blank" href="https://github.com/srwi/EverythingToolbar">https://github.com/srwi/EverythingToolbar</a></p>
+    </div>
+
+    <div class="tree-card">
+      <h4>🌲 PowerToys — 微软官方增强套件</h4>
+      <p>包含唤彩取色、FancyZones 窗口对齐、文本加速提取、键盘重映射等。</p>
+      <p>🔗 <a target="_blank" href="https://github.com/microsoft/PowerToys">https://github.com/microsoft/PowerToys</a></p>
+    </div>
+
+  </div>
+</li>
+</ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+
+

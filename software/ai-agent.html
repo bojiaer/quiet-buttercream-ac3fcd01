@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI Agent 详解 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="../hardware/index.html">硬件</a><a href="../system/index.html">系统</a><a href="index.html" class="active">软件</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">软件</a> / <span>AI Agent 零基础入门</span></div></div>
+<article class="article">
+<h1>AI Agent — 零基础快速上手指南</h1>
+
+<p>不管你是不是技术人员，只要会打字，这一篇看完就能自己玩转 AI Agent。</p>
+<ul class="tree">
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>1️⃣ 什么是 AI Agent</div>
+  <div class="tree-children">
+    <div class="tree-card"><p>通俗理解：AI Agent 就是一个"会用工具的 AI 助手"。它不光会聊天，还会打开网页自动点击、调用软件、自动把你的密码/开关配通……然后自己做一系列任务，据结果自动调整。</p></div>
+    <div class="tree-card"><h4>核心区别：AI 聊天 vs AI Agent</h4><p>普通的 AI 只输出文字。AI Agent <strong>做行为</strong>。比如你告诉 AI："帮我把桌面上所有 PDF 压缩成 Zip"，Agent 会直接调用打包软件，然后交给你文件，而不只是给你出现文件的路径代码。</p></div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>2️⃣ 市面上能立刻用的 Agent 产品</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <h4>💻 OpenAI Codex CLI</h4>
+      <p><strong>这是什么</strong>：一个命令行互动助手，让你直接边说边让 AI 操作电脑中的文件、日记代码、网页。目前 Windows/Mac 都支持，免费基础流量即够日常。</p>
+      <table><tr><th>适合使用者</th><td>程序员、AI入门同学</td></tr><tr><th>能力</th><td>读写磁盘、自动跨文件修改代码、可打开浏览器检查页面、自动调试</td></tr><tr><th>感受</th><td>把 "不知咋做" 说清楚，它自己去完成</td></tr></table>
+    </div>
+    <div class="tree-card">
+      <h4>☁️ Claude Code</h4>
+      <p><strong>这是什么</strong>：基于 Anthropic 的 Claude 的终端 AI Agent 工具。行为和 Codex 类似，特别的风格——更口语化，容易被非英语母语的人理解。</p>
+      <table><tr><th>特点</th><td>集成 GitHub/Git操作、可自动创建 PR、测试、发 Issue——一次搞定。</td></tr></table>
+    </div>
+    <div class="tree-card">
+      <h4>🤖 其他重要 Agent 工具</h4>
+      <table><tr><th>Cursor</th><td>带 AI 全自动补全的代码编辑器</td></tr><tr><th>Windsurf</td><td>专门对复杂文件导航有良好维护</tr><tr><th>ChatGPT + 插件</td><td>点击官方创建的工具交互，让 ChatGPT 连接各种服务——这是所有 Agent 的核心模型</td></tr></table>
+    </div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>3️⃣ API Key 是什么？怎么拿？</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <h4>🔑 API Key = 你的数字身份证</h4>
+      <p>很多人一听“API key”就茫然——其实你只需这样理解：</p>
+      <p><strong>API Key 就是一个独一无二的长密码。</strong>把你的 Agent 工具提交该密钥给 AI 服务端——对方检查你的资格和余额，再让 AI 干活。缺了它就什么都调不了。</p>
+    </div>
+    <div class="tree-card">
+      <h4>📋 从哪能免费拿到 API Key？</h4>
+      <ol>
+        <li>打开 <a target="_blank" href="https://platform.openai.com/api-keys">platform.openai.com</a></li>
+        <li>登入后点 "Create new secret key"。</li>
+        <li>复制生成的长串字符串（<code>sk-proj-xxxxxxxx</code> 开头）。</li>
+        <li>贴在你要用的 Agent 设置中。</li>
+        <li><strong>充值 5 美元即可用你。</strong>日常试用几百次沟通只需很少费用。</li>
+      </ol>
+      <div class="red-alert"><strong>绝对不要跟任何人分享 API Key</strong> —— 包含你付款信息的动态。别人拿到等于花你的钱。</div>
+    </div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>4️⃣ Agent Rules / Rule 是什么意思</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <h4>📜 Rule（规则）= 你给 Agent 写的法律规定</h4>
+      <p>每创建 Agent 实例时你可以在其设置里放一条或多条 “Rule”—— <strong>个性化指令明文</strong> 它必须时刻遵守。比如：</p>
+      <table><tr><th>你写下的 Rule</th><th>效果</th></tr>
+      <tr><td><code>永远用中文输出回答</code></td><td>Agent 不能突然变成英文</td></tr>
+      <tr><td><code>每项写入后都做 git commit</code></td><td>自动提供安全性质的回滚能力</td></tr>
+      <tr><td><code>不要运行 rm 命令</code></td><td>防止新手误删文件</td></tr>
+      <tr><td><code>每次 30 分钟测试一次</code></td><td>Agent 定时积极状态汇报</td></tr>
+    </table>
+    </div>
+    <div class="tree-card">
+      <h4>另一种 Rule：定期自动执行</h4>
+      <p>你甚至可以告诉 Agent：「每天早上 7 点抓取我的每日待办，然后自动存档为 Markdown。」它从 Rule 打开就开始了。</p>
+    </div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>5️⃣ Skill（技能）是什么？怎么用？</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <h4>🎯 Skill = 一套专属的说明书</h4>
+      <p>很多 AI Agent 会有一个概念叫做 Skill—— 你给一组专业指文化塞进 Agent 里，它就有了特殊能力。本质上是一份专业知识教程放上去就能直接调用那些知识。</p>
+      <p><strong>目的</strong>：你用零知识 —— 只要装上一个 skill，Agent 自动会处理那一类问题。</p>
+    </div>
+    <div class="tree-card">
+      <h4>实际例子</h4>
+      <table><tr><th>Skill 名称</th><th>作用</th><th>你无需会</th></tr>
+      <tr><td>📦 PDF 处理</td><td>直接让 Agent 读取 PDF 内容、转图片或输出文本。</td><td>不需要懂 PDF 结构</td></tr>
+      <tr><td>🧾 Excel 专题</td><td>生成带公式的工作簿、自动化报表。</td><td>不需要刻公式</td></tr>
+      <tr><td>📖 Github PR 审阅</td><td>自动发现引名异常等不足。</td><td>不需掌握 GIT 差异对比</td></tr>
+    </table>
+    </div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>6️⃣ 零基础 10 分钟上手四步法</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <ol>
+        <li><strong>装一个 Agent</strong>：搜索 OpenAI Codex 打开官网下载安装（客户端/命令行）。</li>
+        <li><strong>拿一个 API Key</strong>：去平台—创建—复制——贴到 Agent 设置中。</li>
+        <li><strong>设置第一条 Rule</strong>：在设置 区 Rule 里写上“<code>always answer in Chinese, keep answers under 200 words</code>”测试。</li>
+        <li><strong>给你第一个任务</strong>：对 Agent 说：“帮我新建一个电脑硬件笔记 html 页面、包含 CPU 表格、并风格暗色主题。” Agent 自动创建、保存到指定目录、预监。</li>
+        <li><strong>读错就回头改</strong>：出错时告诉 Agent "刚才挂了，请再试"—— Agent 会自动改思路。</li>
+        <li><strong>再附加 Skill</strong>："为电脑硬件库添加相关 PDF 阅读能力" ——下载一个 Adobe 相关或自己设置文档。</li>
+      </ol>
+    </div>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>🧠 更进一步: 模型训练与 RAG</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>Token 是什么</h4><p>AI 看清的最小单位，相当于一个字或词根。每次提问与回答都会消耗 token。</p></div>
+    <div class="tree-card"><h4>RAG — 给 AI 更有实料的知识</h4><p>你把本地 PDF/书籍丢进向量数据库 (Chroma)，AI 先从中找到最相关段落，再生成有据可查的回答。（不对让你数据入幻觉）</p></div>
+  </div>
+</li>
+</ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+
+

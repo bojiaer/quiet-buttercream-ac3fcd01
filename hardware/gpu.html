@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GPU 显卡详解 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="index.html">硬件</a><a href="../system/index.html">系统</a><a href="../software/index.html">软件</a><a href="#" onclick="communityOpen()">社区</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">硬件</a> / <span>GPU</span></div></div>
+<article class="article">
+<h1>GPU（图形处理器）</h1>
+
+<p>显卡产业链分两层：① <strong>芯片设计方</strong>（NVIDIA / AMD 设计 GPU 核心）→ ② <strong>品牌制造方</strong>（华硕/技嘉/微星/七彩虹等购买芯片后装上自己的散热和 PCB 出货）。你买到的卡是后者成品。</p>
+<ul class="tree">
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>芯片设计方：NVIDIA 英伟达</div>
+  <div class="tree-children">
+    <ul class="tree">
+      <li class="tree-node open">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>按定位层级（通用规则）</div>
+        <div class="tree-children">
+          <div class="tree-card"><h4>XX50 级 — 入门卡</h4><p>6-8 GB 显存。1080p 中低设定起步即入。最大保有量。</p></div>
+          <div class="tree-card"><h4>XX60 级 — 甜点级（装机最大体量）</h4><p>1080p/2K 高画质起步 光追。DLSS/FSR 是NX基石之一。</p></div>
+          <div class="tree-card"><h4>XX70 级 — 高端起步</h4><p>≥12 GB 显存，能流畅体验 2K 高画质 60fps+ 和视频渲染。</p></div>
+          <div class="tree-card"><h4>XX80 级 — 次旗舰</h4><p>≥16 GB 显存，4K中等设置轻松应对。本地执行 AI 模型良好入门/成本位。</p></div>
+          <div class="tree-card"><h4>XX90 级 — 卡皇</h4><p>24GB+，最终消费级别单卡之王。8K/AI全幅无妥协、需要≥900W电源。</p></div>
+        </div>
+      </li>
+      <li class="tree-node">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>代系区别</div>
+        <div class="tree-children">
+          <div class="tree-card"><h4>30 系 (Ampere)→40 系 (Ada Lovelace)→50 系 (Blackwell, 2025+)</h4><p>50系有 DLSS4 多帧生成、全系列路径光追流水线改进、深度学习有效显示。已最新。</p></div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>芯片设计方：AMD 超威</div>
+  <div class="tree-children">
+    <ul class="tree">
+      <li class="tree-node open">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>按定位层级 (RX)</div>
+        <div class="tree-children">
+          <div class="tree-card"><h4>RX X600 级→X700(甜点)→X800(次旗舰)→X900(旗舰)</h4><p>AmD 顶级Radeon 九千系拉高，以 24 GB 显存 + 相比旧代有重大 AI加速改进造等工作负荷。</p></div>
+        </div>
+      </li>
+      <li class="tree-node">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>代系: 6000(RDNA2)→7000(RDNA3)→9000(RDNA4, 2025+)</div>
+        <div class="tree-children"><div class="tree-card"><p>RDNA4 聚焦于更适应光追环境、统一加速方案变化和成本压缩——即 RX 9000 系列。</p></div></div>
+      </li>
+    </ul>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>芯片设计方: Intel Arc 系列</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>Arc A300 / A500 / A700 → Battlemage (B 系列)</h4><p>创作者性价比和高性价比编码硬件。</p></div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>品牌制造方 — 拿到芯片加工整卡（AIC 合作伙伴）</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>🏷 一线大厂（工程积累深厚）</h4><table><tr><th>华硕 (ASUS)</th><td>3-风扇 双滚珠 系列，TUF / ROG 在散热片品质上稳定 | ROG 定价高</td></tr><tr><th>微星 (MSI)</th><td>VENTUS > GAMING X 系列 设计扁平有个性</td></tr><tr><th>技嘉 (Gigabyte)</th><td>EAGLE / AORUS 提供生产线全品类、售后进量大</td></tr></table></div>
+    <div class="tree-card"><h4>🏷 中国主要品牌</h4><table><tr><th>七彩虹 (Colorful)</th><td>Ultra 白配成经典、火神王 / 漩涡扇系列——国内出货量占大。</td></tr><tr><th>影驰 (GALAX)</th><td>独家四芯统一方案，性价比表现</td></tr><tr><th>铭瑄 (Maxsun)</th><td>采购方面有限供应激烈价位带</td></tr></table></div>
+    <div class="tree-card"><h4>🏷 其他精选品牌</h4><table><tr><th>蓝宝石 (Sapphire)</th><td>仅做 AMD 卡——氮动散热方案BPX素推。</td></tr><tr><th>撼讯 (PowerColor)</th><td>AMD XT恶魔红龙/Red Devil 的高频称王。</td></tr><tr><th>PALIT / 同德 + Gainward 耕升</th><td>三风扇结硬达水准——非常可靠的成本信念品。</td></tr><tr><th>ZOTAC</th><td>迷你尺寸(mini ITX)卡专家。</td></tr></table></div>
+    <div class="red-alert"><strong>记住：</strong>无论买华硕、微星、技嘉、七彩虹、影驰、铭瑄……里面的 GPU 芯片只来自 NVIDIA 或 AMD。品牌方决定的是散热 / 供电相数 / 静音花园——而定位层决定你的实际游戏性能。XX60 就是 XX60——无论贴套谁的Logo。</div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>显存 (VRAM) & 带宽</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>带宽公式</h4><p>= 显存等效频率 × 总线位宽 ÷ 8</p></div>
+    <div class="tree-card"><h4>推荐大小</h4><table><tr><th>1080p</th><td>6-8 GB</td></tr><tr><th>2K 游戏</th><td>≥ 12 GB</td></tr><tr><th>4K / AI 模型</th><td>16 GB 起步</td></tr></table></div>
+  </div>
+</li>
+</ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+
+

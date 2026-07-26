@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>软件区 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+<style>
+.community-overlay{display:none;position:fixed;inset:0;background:#0f1117;z-index:200;overflow:hidden}
+.community-overlay.open{display:block}
+.community-header{display:flex;align-items:center;gap:16px;padding:14px 28px;border-bottom:1px solid #2a2d3a;background:#161822}
+.community-header h1{color:#fff;font-size:1.15rem;flex:1}
+.community-header button{background:#7c6ff7;border:none;border-radius:8px;color:#fff;padding:8px 20px;font-weight:600;cursor:pointer;font-size:.88rem}
+.community-header button.close-btn{background:transparent;border:1px solid #2a2d3a;color:#c8ccd4}
+.stage{position:relative;width:100%;height:calc(100vh - 57px)}
+.note{position:absolute;width:240px;background:rgba(22,24,34,.85);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 20px;box-shadow:0 8px 32px rgba(0,0,0,.5);cursor:pointer;transition:transform .3s,box-shadow .3s;animation:float 12s ease-in-out infinite;color:#c8ccd4;user-select:none}
+.note:hover{transform:scale(1.06) rotate(0deg)!important;box-shadow:0 12px 40px rgba(124,111,247,.4);z-index:50;border-color:rgba(124,111,247,.4)}
+.note .author{font-weight:600;font-size:.85rem;margin-bottom:8px}
+.note .body{font-size:.85rem;line-height:1.5;max-height:120px;overflow:hidden}
+.note .time{color:#6b7084;font-size:.7rem;margin-top:10px}
+.note .del-btn{position:absolute;top:8px;right:10px;background:none;border:none;color:#6b7084;cursor:pointer;font-size:.75rem}
+.note .del-btn:hover{color:#ff5252}
+.empty-note{display:flex;align-items:center;justify-content:center;font-size:.85rem;opacity:.15}
+@keyframes float{0%,100%{transform:translate(0,0) rotate(-1deg)}25%{transform:translate(40px,-20px) rotate(1.5deg)}50%{transform:translate(-20px,30px) rotate(-1deg)}75%{transform:translate(-30px,-15px) rotate(0.5deg)}}
+</style>
+</head><body>
+<div id="mainPage">
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="../hardware/index.html">硬件</a><a href="../system/index.html">系统</a><a href="index.html" class="active">软件</a><a href="#" onclick="communityOpen()">社区</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<section class="hero"><div class="container"><h1>软件区</h1></div></section>
+<section class="section"><div class="container">
+  <div class="cards">
+    <a href="ai-agent.html" class="card"><h3>🤖 AI Agent 零基础入门</h3><p>Agent 概念、Codex / Claude Code / Cursor 实测、API Key 与 Rule 基础、Skill 使用。</p></a>
+    <a href="github.html" class="card"><h3>🐙 GitHub 开源平台</h3><p>Star/Fork/PR 流程 + 精选项目推荐（GenP、LM Studio、ComfyUI、图吧工具箱等）。</p></a>
+    <a href="adobe.html" class="card"><h3>🎨 Adobe 创意套件</h3><p>Ps/Ai/Pr/AE/LR 各软件定位与工作流程科普。</p></a>
+    <a href="links.html" class="card"><h3>🔗 实用网址推荐</h3><p>图吧工具箱、Steam、游戏加加、三家显卡驱动官方下载等装机常用网站直达链接。</p></a>
+    <a href="network.html" class="card"><h3>🌐 网络访问与实用工具</h3><p>全球互联网资源访问基础科普，开放学术与研究资源导航。</p></a>
+    <a href="python.html" class="card"><h3>🐍 Python</h3><p>万能编程语言——解释它是做什么的，为什么大量 AI 工具和脚本都需要它作为依赖。</p></a>
+    <a href="office.html" class="card"><h3>📎 办公与编码工具</h3><p>Excel 高级函数、Word 域代码、Markdown 与 Git 操作速览。</p></a>
+    <a href="security.html" class="card"><h3>🛡 安全与维护</h3><p>火绒/360 官网、银狐/木马/挖矿/勒索/流氓软件识别与处理方法。</p></a>
+  </div>
+</div></section>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+</div>
+<div class="community-overlay" id="co">
+  <header class="community-header"><h1>💬 社区讨论</h1><button class="close-btn" onclick="communityClose()">✕ 关闭</button><button onclick="communityPostOpen()">+ 发帖</button></header>
+  <div id="tagBar" class="tag-bar"></div>
+  <div class="stage" id="stage"></div>
+</div>
+<div class="modal-overlay" id="postModal">
+  <div class="modal"><h3>发表新讨论</h3><input type="text" id="postTag" placeholder="标签（如 CPU、GPU 等）"><textarea id="postBody" placeholder="写点什么..."></textarea><div class="modal-btn"><button class="btn-cancel" onclick="communityPostClose()">取消</button><button class="btn-save" onclick="communityPost()">发布</button></div></div>
+</div>
+<script src="../js/app.js"></script>
+
+<script>function communityOpen(){document.getElementById("mainPage").style.display="none";document.getElementById("co").classList.add("open");setTimeout(function(){renderC()},50)}function communityClose(){document.getElementById("mainPage").style.display="";document.getElementById("co").classList.remove("open")}</script>
+
+<div class="modal-overlay" id="replyModal">
+  <div class="modal"><h3>💬 回复讨论</h3><input type="hidden" id="replyPostId"><p class="reply-original"><span id="replyPostTag"></span> <span id="replyPostBody"></span></p><div class="reply-list" id="replyList"><div class="reply-empty">暂无回复，来写第一条</div></div><textarea id="replyInput" placeholder="写回复..."></textarea><div class="modal-btn"><button class="btn-cancel" onclick="replyClose()">关闭</button><button class="btn-save" onclick="replyPost()">回复</button></div></div>
+</div>
+<div class="modal-overlay" id="loginModal">
+  <div class="modal"><h3>🔒 登录 / 注册</h3>
+    <div id="loginStep1">
+      <label>邮箱地址</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com">
+      <div class="modal-btn"><button class="btn-cancel" onclick="loginClose()">取消</button>
+      <button class="btn-save" onclick="sendLoginCode()">发送验证码</button></div>
+    </div>
+    <div id="loginStep2" style="display:none">
+      <p style="margin-bottom:8px;">验证码已发送至 <strong id="loginEmailDisplay"></strong></p>
+      <input type="text" id="loginCode" placeholder="输入验证码">
+      <div class="modal-btn"><button class="btn-cancel" onclick="showLogin()">返回</button>
+      <button class="btn-save" onclick="verifyLoginCode()">登入</button></div>
+    </div>
+  </div>
+</div>
+</body></html>
+
+
+

@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>主板与机箱 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="index.html">硬件</a><a href="../system/index.html">系统</a><a href="../software/index.html">软件</a><a href="#" onclick="communityOpen()">社区</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">硬件</a> / <span>主板与机箱</span></div></div>
+<article class="article">
+<h1>主板与机箱规格对照</h1>
+
+<ul class="tree">
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>Intel 平台（LGA 插槽）</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>H610 — 入门级</h4><table><tr><th>内存</th><td>DDR4/DDR5</td></tr><tr><th>CPU 超频</th><td>不支持</td></tr><tr><th>内存 XMP 超频</th><td>不支持</td></tr></table></div>
+    <div class="tree-card"><h4>B760 — 主流</h4><table><tr><th>内存</th><td>DDR4/DDR5</td></tr><tr><th>CPU 超频</th><td>不支持</td></tr><tr><th>内存 XMP 超频</th><td>支持</td></tr></table></div>
+    <div class="tree-card"><h4>Z790 — 旗舰</h4><table><tr><th>内存</th><td>DDR5</td></tr><tr><th>CPU 超频</th><td>支持</td></tr><tr><th>内存 XMP 超频</th><td>支持（高频率上限更高）</td></tr></table></div>
+    <div class="red-alert"><strong>总结</strong>：Intel 只有 Z 板支持 CPU 超频。H610 和 B760 不可超 CPU，但 B760 可内存 XMP。</div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>AMD 平台平台（AM4 / AM5）</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>A620 — 入门 (AM5)</h4><table><tr><th>内存</th><td>DDR5</td></tr><tr><th>CPU 超频</th><td>不支持</td></tr><tr><th>内存 EXPO 超频</th><td>支持</td></tr></table></div>
+    <div class="tree-card"><h4>B650 / B650E — 主流</h4><table><tr><th>CPU 超频</th><td>支持</td></tr><tr><th>内存超频</th><td>支持</td></tr><tr><th>B650E 独有</th><td>PCIe 5.0 x16 槽</td></tr></table></div>
+    <div class="tree-card"><h4>X670 / X670E — 旗舰</h4><table><tr><th>CPU 超频</th><td>支持</td></tr><tr><th>内存超频</th><td>支持（上限更高）</td></tr><tr><th>X670E 独有</th><td>两个 PCIe 5.0 x16 槽</td></tr></table></div>
+    <div class="red-alert"><strong>总结</strong>：AMD B650/X670 系列都支持 CPU 超频。A620 不支持。两个平台都是主流级以上可内存超频。</div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>主板后缀含义</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <table><tr><th>后缀</th><th>含义</th><th>举例</th></tr>
+      <tr><td>-M</td><td>Micro-ATX 小板型</td><td>H610M-K</td></tr>
+      <tr><td>-K</td><td>华硕低配型（接口少、用料精简）</td><td>H610M-K</td></tr>
+      <tr><td>-A</td><td>标注更多视频输出接口（华硕）</td><td>H610M-A</td></tr>
+      <tr><td>-E</td><td>基础入门版，接口较少（华硕）</td><td>H610M-E</td></tr>
+      <tr><td>-F</td><td>无板载核显输出接口（华硕）</td><td>B760M-F</td></tr>
+      <tr><td>-Plus / -Pro</td><td>中档，接口多/供电加强</td><td>B760-Plus</td></tr>
+      <tr><td>-TUF / -ROG</td><td>高端游戏系列——更强的供电与散热</td><td>B760M-TUF</td></tr>
+    </table>
+    </div>
+    <div class="tree-card"><p><strong>例</strong>：<code>H610M-K</code> = H610 + Micro-ATX 小板 + 减配版。 <code>B760M-A WiFi</code> = B760 + M-ATX + A多接口 + WiF/蓝牙。</p></div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>带 WiFi 和不带 WiFi 的区别</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <h4>📡 带 WiFi 版本</h4>
+      <table><tr><th>识别</th><td>型号末尾有 "WiFi" 或 "AC/AX"</td></tr><tr><th>优点</th><td>板载无线网卡 + 蓝牙模块，无需额外 PCIe 卡。适合没网线或蓝牙设备多（手柄/耳机）</td></tr><tr><th>缺点</th><td>比不带WiFi版贵 50-100 元，需要外接天线</td></tr></table>
+    </div>
+    <div class="tree-card">
+      <h4>🔌 不带 WiFi 版本</h4>
+      <table><tr><th>识别</th><td>没有 WiFi 字样</td></tr><tr><th>优点</th><td>价格低，不需要天线</td></tr><tr><th>注意</th><td>只能靠网线联网。想用蓝牙必须另买 USB 蓝牙适配器或 PCIe 网卡。</td></tr></table>
+    </div>
+    <div class="red-alert"><strong>后装方案</strong>：已有不带 WiFi 的主板？买一个 PCIe x1 WiFi6 模块（AX210 约 60 元）插上去，蓝牙和 WiFi 就都有了。</div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>主板尺寸规格（从小到大）</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>Mini-ITX（170mm × 170mm）</h4><table><tr><th>内存</th><td>2</td></tr><tr><th>PCIe</th><td>1 x16</td></tr><tr><th>适用</th><td>极小机箱/便携主机</td></tr></table></div>
+    <div class="tree-card"><h4>Micro-ATX（244mm × 244mm）</h4><table><tr><th>内存</th><td>2-4</td></tr><tr><th>适用</th><td>90% 家用装机</td></tr></table></div>
+    <div class="tree-card"><h4>Standard ATX（305mm × 244mm）</h4><table><tr><th>内存</th><td>4</td></tr><tr><th>适用</th><td>旗舰游戏/多扩展卡</td></tr></table></div>
+    <div class="tree-card"><h4>Extended-ATX（305mm × 277mm+）</h4><p>更宽——必须用 E-ATX 兼容机箱。工作站。</p></div>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>机箱规格对照</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>ITX 机箱</h4><table><tr><th>主板</th><td>仅 Mini-ITX</td></tr><tr><th>显卡</th><td>180-300mm</td></tr><tr><th>散热</th><td>120mm 冷</td></tr><tr><th>电源</th><td>SFX</td></tr></table></div>
+    <div class="tree-card"><h4>M-ATX 机箱</h4><table><tr><th>主板</th><td>ITX + M-ATX</td></tr><tr><th>散热</th><td>240/280 冷排</td></tr><tr><th>电源</th><td>ATX</td></tr></table></div>
+    <div class="tree-card"><h4>ATX 中塔</h4><table><tr><th>主板</th><td>ITX/M-ATX/ATX</td></tr><tr><th>散热</th><td>360 冷排</td></tr><tr><th>体积</th><td>约微波炉</td></tr></table></div>
+    <div class="tree-card"><h4>E-ATX 全塔</h4><table><tr><th>主板</th><td>所有含 E-ATX</td></tr><tr><th>体积</th><td>巨大</td></tr></table></div>
+    <div class="red-alert"><strong>装机先检查：ITX/M-ATX/ATX 主板尺寸 + 显卡长 + 电源长 + 冷排安装位</strong></div>
+  </div>
+</li>
+
+</ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+

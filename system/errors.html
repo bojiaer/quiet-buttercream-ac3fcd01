@@ -1,0 +1,138 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Windows 常见错误代码速查 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="../hardware/index.html">硬件</a><a href="index.html">系统</a><a href="../software/index.html">软件</a><a href="#" onclick="communityOpen()">社区</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">系统</a> / <span>错误代码速查</span></div></div>
+<article class="article">
+<h1>Windows 常见错误代码与蓝屏速查手册</h1>
+
+<div class="red-alert"><strong>常规提示</strong>：运行命令前请将 cmd/PowerShell 以管理员身份打开。操作注册表编辑器前建议先导出备份分支。</div>
+<ul class="tree">
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>蓝屏错误 (BSOD) — 所有常见停止代码</div>
+  <div class="tree-children">
+
+    <div class="tree-card">
+      <h4>0x0000007B — INACCESSIBLE_BOOT_DEVICE</h4>
+      <p>硬盘控制器模式变更（IDE ↔ AHCI/RAID）导致启动设备不可访问。</p>
+      <ol><li>重启进 BIOS → Storage Configuration → 切换 SATA 模式。</li><li>进 PE 系统后运行：<code>bootrec /fixmbr</code> <code>bootrec /fixboot</code> <code>bootrec /rebuildbcd</code></li></ol>
+    </div>
+
+    <div class="tree-card">
+      <h4>0x000000EA — THREAD_STUCK_IN_DEVICE_DRIVER</h4>
+      <p>显卡驱动陷入死循环，屏幕卡住几秒后蓝屏。</p>
+      <ul><li>开机 F8 进安全模式 → DDU 工具卸载所有显卡驱动残余。</li><li>从官网下载 WHQL 认证驱动重装。</li><li>拔掉独显靠核显——先把范围缩小成卡死还是卡坏。</li></ul>
+    </div>
+
+    <div class="tree-card">
+      <h4>0x00000050 — PAGE_FAULT_IN_NONPAGED_AREA</h4>
+      <p>系统尝试访问一个不存在的虚拟地址页 → 99% 故障是内存坏根、坏驱动或硬件识别错误。</p>
+      <ul><li>拔掉至少一根内存条仅留一条测试。</li><li><code>sfc /scannow</code> 修系统文件。</li><li>事件查看器 → 筛选 Kernel-Power 事件。</li></ul>
+    </div>
+
+    <div class="tree-card">
+      <h4>0x0000001A — MEMORY_MANAGEMENT</h4>
+      <p>通常为 RAM 显存错误或系统内存管理程序异常。</p><ul><li>memtest86 完全测试 2 小时。</li></ul>
+    </div>
+
+    <div class="tree-card">
+      <h4>0x000000D1 — DRIVER_IRQL_NOT_LESS_OR_EQUAL</h4>
+      <p>驱动试图在非许可 IRQL 访问物理内存。</p><ul><li>拔除非必要外设 → 看哪个驱动崩溃或通过蓝屏查看对应 .sys 文件名。</li></ul>
+    </div>
+
+    <div class="tree-card">
+      <h4>0x0000003B — SYSTEM_SERVICE_EXCEPTION</h4>
+      <p>网络安全/系统文件损坏导致。</p><ul><li>DISM 修复：<code>DISM /Online /Cleanup-Image /RestoreHealth</code>。</li></ul>
+    </div>
+
+    <div class="tree-card">
+      <h4>0x0000009F — DRIVER_POWER_STATE_FAILURE</h4>
+      <p>系统从睡眠/休眠唤醒时驱动出错。Intel 英特尔无线网卡驱动高度可能。</p><ul><li>更新无线网卡驱动 + 测唤醒。</li></ul>
+    </div>
+
+    <div class="tree-card">
+      <h4>0x00000124 — WHEA_UNCORRECTABLE_ERROR</h4>
+      <p>硬件故障系统报告（CPU 或电压不稳）。</p><ul><li>清 BIOS 缺省，若超频先清回默认。</li></ul>
+    </div>
+
+    <div class="tree-card">
+      <h4>0x00000D1 — IRQL Drive...重复→算旧版本含其他关联。</h4>
+      <p>通过 <code>kd</code>或 WinDbg 确认准确错误Source。</p>
+    </div>
+
+    <div class="tree-card">
+      <h4>0xC000021A — STATUS_SYSTEM_PROCESS_TERMINATED</h4>
+      <p>信任的系统进程Winlogon或CSRSS被不兼容的第三方软件干掉。</p><ul><li>W进安全模式→ msconfig 关最近启动。</li></ul>
+    </div>
+
+    <div class="tree-card">
+      <h4>CRITICAL_PROCESS_DIED</h4>
+      <p>关键系统进程不存在了修复——pe内还原或重置。</p></div>
+
+    <div class="tree-card">
+      <h4>KERNEL_SECURITY_CHECK_FAILURE</h4>
+      <p>内核模块的指针损坏，双驱动冲突高度可能——卸载虚拟网卡／杀毒。</p>
+    </div>
+
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>启动 / 程序错误</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>无法启动此程序，因为计算机中丢失 xxx.dll</h4><p>DirectX/VC 运行库被错删。</p><ul><li>管理员 PowerShell：<code>sfc /scannow</code></li><li>安装 DirectX 9.0c 最终用户运行时 + Visual C++ AIO 安装包。</li></ul></div>
+    <div class="tree-card"><h4>错误 0x80070002 / 0x80070003 — 找不到文件</h4><p>Windows Update 或服务期Down缓存坏。</p><ul><li>cmd 停止 wuauserv → 删除 C:\Windows\SoftwareDistribution\ → 重启 wuauserv。</li></ul></div>
+    <div class="tree-card"><h4>0xc0000225 — 找不到启动设备</h4><p>BCD 表有误。</p><ul><li>PE 系统中执行：<code>bootrec /rebuildbcd</code></li></ul></div>
+    <div class="tree-card"><h4>0xc000000F — Windows 启动管理器错误</h4><p>BCD 损坏，蓝屏出现该 CODE 一般直接提示进入恢复环境。</p></div>
+    <div class="tree-card"><h4>0x80004005 — 未指明的通用错误</h4><p>RDP / 权限/ DCOM 原因→检查防病毒软件强制。</p></div>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>网络连接故障</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <h4>DNS 服务器未响应</h4>
+      <ul><li>网络适配器属性 → IPv4 → 推敲 DNS 为 <code>1.1.1.1</code> / <code>223.5.5.5</code>。</li><li>运行 <code>ipconfig /flushdns</code>。</li></ul>
+    </div>
+    <div class="tree-card"><h4>ERR_CONNECTION_RESET / 连接已重置</h4><p>代理/VPN 或浏览器缓存问题 → <code>netsh winsock reset</code>。</p></div>
+    <div class="tree-card"><h4>ERR_NAME_NOT_RESOLVED / 无法解析服务器地址</h4><p>理论→直连的 VPN 的设置——断开代理试。</p></div>
+    <div class="tree-card"><h4>0x800CCC0F — 邮件端口出站被挡</h4><p>防火墙 25 端口异常。</p></div>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>Windows Update 专属错误</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>0x80070020 — 程序正在使用</h4><p>杀毒临时锁文件→清卸载 SoftwareDistribution。</p></div>
+    <div class="tree-card"><h4>0x80072EE2  / 0x80072F8F — 时间与服务器不同步</h4><p>消除Windows时间 → 对时 time.windows.com。</p></div>
+    <div class="tree-card"><h4>0x800F0922 — 太小的系统保留分区</h4><p>将 System Reserved 扩至 500MB。</p></div>
+    <div class="tree-card"><h4>0x8024200B — 更新下载损坏</h4><p>暂停更新然后重新触发。</p></div>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>存储路径错误</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>0x800703EE (文件污染)</h4><p>外设没有安全弹出损坏;</p></div>
+    <div class="tree-card"><h4>0x8007001F — 设备未运行完全</h4><p>PC 不能读外部硬盘，急用仅此一个分区便不再了。</p></div>
+  </div>
+</li>
+</ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+
+
+

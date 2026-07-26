@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CPU 处理器详解 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="index.html">硬件</a><a href="../system/index.html">系统</a><a href="../software/index.html">软件</a><a href="#" onclick="communityOpen()">社区</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">硬件</a> / <span>CPU</span></div></div>
+<article class="article">
+<h1>CPU 处理器详解</h1>
+
+<ul class="tree">
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>Intel 英特尔</div>
+  <div class="tree-children">
+    <ul class="tree">
+      <li class="tree-node open">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>酷睿 (Core) 桌面系列</div>
+        <div class="tree-children">
+          <div class="tree-card"><h4>i3 — 入门 / 轻办公</h4><table><tr><th>核心/线程</th><td>4 Core / 8 Thread</td></tr><tr><th>适用 | </th></tr></table></div>
+          <div class="tree-card"><h4>i5 — 主流性能</h4><table><tr><th>核心/线程</th><td>10-14 Core（混合架构）</td></tr><tr><th>适用</th><td>中大型游戏 + 轻创作</td></tr></table></div>
+          <div class="tree-card"><h4>i7 — 高端多任务</h4><table><tr><th>核心/线程</th><td>16-20 Core</td></tr><tr><th>适用</th><td>视频剪辑 / 3D 建模</td></tr></table></div>
+          <div class="tree-card"><h4>i9 — 旗舰极限性能</h4><table><tr><th>核心/线程</th><td>24 Core / 32 Thread</td></tr><tr><th>适用</th><td>重度多线程、工作站</td></tr></table></div>
+        </div>
+      </li>
+      <li class="tree-node open">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>Core Ultra 系列 — 新命名体系 (2024+)</div>
+        <div class="tree-children">
+          <div class="tree-card">
+            <h4>Core Ultra 5 / 7 / 9</h4>
+            <table><tr><th>架构</th><td>Meteor Lake（分离式 tile 设计） + Arrow Lake</td></tr><tr><th>工艺</th><td>Intel 4 + TSMC 3nm</td></tr><tr><th>亮点</th><td>首次内置 NPU（AI 加速单元）、新一代 SoC 架构、能效比大幅改善</td></tr><tr><th>命名示例</th><td>Core Ultra 7 265K（Arrow Lake）</td></tr></table>
+            <p style="margin-top:6px;color:var(--text-muted);font-size:.84rem;">从第14代开始，Intel 不再用 "i" 前缀——所有新处理器改为 Core Ultra 5/7/9 或 Core 3/5/7 命名。</p>
+          </div>
+        </div>
+      </li>
+      <li class="tree-node">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>奔腾 (Pentium) / 赛扬 (Celeron)</div>
+        <div class="tree-children"><div class="tree-card"><h4>定位</h4><p>低功耗办公/教育用途，迷你主机或软路由常用。</p></div></div>
+      </li>
+      <li class="tree-node">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>至强 (Xeon)</div>
+        <div class="tree-children"><div class="tree-card"><h4>定位</h4><p>服务器/工作站级，支持 ECC，不支持常规游戏 PC。</p></div></div>
+      </li>
+    </ul>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>AMD 超威</div>
+  <div class="tree-children">
+    <ul class="tree">
+      <li class="tree-node open">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>锐龙 (Ryzen) 系列</div>
+        <div class="tree-children">
+          <div class="tree-card"><h4>Ryzen 3 — 入门</h4><table><tr><th>代表</th><td>R3 4100, R3 5300G</td></tr><tr><td>适用</td><td>家庭日常、网课</td></tr></table></div>
+          <div class="tree-card"><h4>Ryzen 5 — 主流甜点</h4><table><tr><th>代表</th><td>R5 5600, R5 7500F, R5 7600, R5 9600X</td></tr><tr><td>适用</td><td>游戏 + 轻创作</td></tr></table></div>
+          <div class="tree-card"><h4>Ryzen 7 — 高效多核</h4><table><tr><th>代表</th><td>R7 5800X, R7 7700X, R7 7800X3D, R7 9800X3D</td></tr><tr><td>适用</td><td>游戏直播 / 渲染引擎</td></tr></table></div>
+          <div class="tree-card"><h4>Ryzen 9 — 桌面旗舰</h4><table><tr><th>代表</th><td>R9 5950X, R9 7950X, R9 9950X</td></tr><tr><td>适用</td><td>3D 动画 + 科学计算多线程</td></tr></table></div>
+        </div>
+      </li>
+      <li class="tree-node">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>APU（板载核显系列）</div>
+        <div class="tree-children"><div class="tree-card"><h4>定位</h4><p>带 Radeon Graphics 核心显卡，适合 ITX 和无独显迷你机。</p></div></div>
+      </li>
+      <li class="tree-node">
+        <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>Threadripper 线程撕裂者</div>
+        <div class="tree-children"><div class="tree-card"><h4>定位</h4><p>64 核专业工作站/虚拟多开，需搭配 TRX50 芯片组。</p></div></div>
+      </li>
+    </ul>
+  </div>
+</li>
+</ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+
+

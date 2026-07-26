@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>外设 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="index.html">硬件</a><a href="../system/index.html">系统</a><a href="../software/index.html">软件</a><a href="#" onclick="communityOpen()">社区</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">硬件</a> / <span>外设</span></div></div>
+<article class="article">
+<h1>外设：键盘 / 鼠标 / 显示器</h1>
+
+
+<ul class="tree">
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>机械键盘 — 轴体分类</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>段落轴</h4><table><tr><th>青轴</th><td>清脆响亮的 Clicky 声音，打字节奏分明</td></tr><tr><th>茶轴</th><td>微弱段落 + 比青轴安静，适合办公室</td></tr></table></div>
+    <div class="tree-card"><h4>线性轴</h4><table><tr><th>红轴</th><td>轻压力 (45g)，静默线性按压 — 办公 / FPS 良好平衡</td></tr><tr><th>黑轴</th><td>高压力 (60g) 诚配耐力玩家，不容易误触</td></tr></table></div>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>鼠标 — 核心参数</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>DPI (每英寸点数)</h4><p>传感器物理精度，大部分电竞尊守 800 - 1600 DPI。过高 DPI 是插值，没有额外意义。</p></div>
+    <div class="tree-card"><h4>回报率 (Polling Rate)</h4><p>1000 Hz = 每秒向 PC 报告鼠标位置 1000 次。FPS 选手感受差异显著。</p></div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>显示器 — 核心选购要点</div>
+  <div class="tree-children">
+
+    <h3 style="margin:18px 0 10px;color:var(--accent2);">📏 尺寸速查（常见参照物体）</h3>
+    <div class="tree-card">
+      <table><tr><th>尺寸</th><th>可视面积参考</th><th>相当于</th></tr>
+      <tr><td>15.6 英寸（笔记本）</td><td>≈ 34.5 cm × 19.4 cm</td><td>一本 A4 杂志竖起来看</td></tr>
+      <tr><td>21.5 英寸</td><td>≈ 47.6 cm × 26.8 cm</td><td>两张 iPad 铺平短边拼在一起的宽度</td></tr>
+      <tr><td>24 英寸</td><td>≈ 52.7 cm × 29.7 cm</td><td>一张展开的报纸大小</td></tr>
+      <tr><td>27 英寸</td><td>≈ 59.7 cm × 33.6 cm</td><td>一个标准大号书包隔层侧面那么大</td></tr>
+      <tr><td>32 英寸</td><td>≈ 70.8 cm × 39.9 cm</td><td>差不多一台微波炉的正面大小</td></tr>
+      <tr><td>34 英寸（带鱼屏 21:9）</td><td>≈ 79.3 cm × 34.0 cm</td><td>两个 24 寸屏横向并排</td></tr>
+    </table>
+    </div>
+
+    <h3 style="margin:20px 0 10px;color:var(--accent2);">🎨 色域详解</h3>
+    <div class="tree-card">
+      <h4>sRGB</h4>
+      <p><strong>范围</strong>：最窄、最基础——涵盖约 35% 的可见光色彩。是互联网、Windows 原生、日常文档的一致性标准。如果你只是看网页/Office，只要 sRGB 99%+ 就行。</p>
+      <table><tr><th>够用标准</th><td>≥ 95% sRGB</td></tr></table>
+    </div>
+    <div class="tree-card">
+      <h4>DCI-P3（电影级色域）</h4>
+      <p><strong>范围</strong>比 sRGB 广约 25%——主要覆盖面黄、红、绿更丰富。是苹果系 HDR 视频、电影行业标准。用于 Final Cut Pro / Resolve / Photo 后期。</p>
+      <table><tr><th>专业标准</th><td>≥ 90% DCI-P3</td></tr></table>
+    </div>
+    <div class="tree-card">
+      <h4>Adobe RGB</h4>
+      <p><strong>范围</strong>覆盖印刷行业CMYK做映射。如果你不会做平面排版印刷品，根本用不着 99% Adobe RGB——盲目买等于多花钱。</p>
+      <table><tr><th>推荐</th><td>≥ 99% Adobe RGB（仅印刷/打样人员）</td></tr></table>
+    </div>
+    <div class="red-alert"><strong>重要</strong>：厂商标记 "wide gamut" 不等于准确——色域是对实际色彩空间的匹配精度，色域偏离停在能否还原皮肤色的基础层次。选购时关注 ΔE &lt; 2 的色准标识。</div>
+
+    <h3 style="margin:20px 0 10px;color:var(--accent2);">📌 选显示器要看的七个参数</h3>
+    <div class="tree-card">
+      <ol>
+        <li><strong>分辨率</strong>：1080p → 2K → 4K。日常办公 2K 为甜点级。</li>
+        <li><strong>刷新率</strong>：60Hz（办公就够）→ 144Hz（游戏推荐）→ 240Hz+（FPS 竞速）</li>
+        <li><strong>面板类型</strong>：IPS（色彩好）→ VA（对比高）→ TN（响应快但可视差）→ OLED（极致对比但价格贵）</li>
+        <li><strong>色域覆盖率</strong>：依据你的使用类型选色域（看上文）。</li>
+        <li><strong>亮度</strong>：300尼特以上用于常规室内。HDR 显示 > 600尼特方起步。</li>
+        <li><strong>接口</strong>：HDMI 2.1 或 DP 1.4 是否支持你需要的分辨率+刷新率组合（如 4K 120Hz）？</li>
+        <li><strong>护眼</strong>：低蓝光认证 + 不闪屏DC调光。</li>
+      </ol>
+    </div>
+  </div>
+</li>
+</ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+
+
+

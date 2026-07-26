@@ -1,0 +1,12 @@
+# computer-knowledge-api Worker
+name = "computer-knowledge-api"
+main = "src/index.js"
+compatibility_date = "2026-07-26"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[vars]
+SUPABASE_URL = "https://qmxjodfvzuvxvxmkjhju.supabase.co"
+JWT_SECRET = "ck-jwt-secret-2026-kb"

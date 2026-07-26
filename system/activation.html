@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Windows 激活方法 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="../hardware/index.html">硬件</a><a href="index.html">系统</a><a href="../software/index.html">软件</a><a href="#" onclick="communityOpen()">社区</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">系统</a> / <span>Windows 激活</span></div></div>
+<article class="article">
+<h1>Windows 激活方法 — 命令行</h1>
+
+<ul class="tree">
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>数字许可证激活（Win10 / Win11）</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <h4>什么是数字许可证</h4>
+      <p>数字许可证（Digital License）绑在你的设备硬件上，不需要输入产品密钥。做过一次激活以后，重装系统也能自动重新激活。</p>
+    </div>
+    <div class="tree-card">
+      <h4>操作步骤</h4>
+      <ol>
+        <li>以管理员身份打开 CMD 或 PowerShell</li>
+        <li>安装对应版本的通用密钥（GVLK）：<br><code>slmgr /ipk W269N-WFGWX-YVC9B-4J6C9-T83GX</code><br>（上面是专业版密钥，其他版本去微软官方查"GVLK Windows"）</li>
+        <li>联网状态下运行：<br><code>slmgr /ato</code></li>
+        <li>看到弹出窗口提示"已成功激活"就完成了</li>
+      </ol>
+      <div class="red-alert"><strong>注意</strong>：这需要电脑能正常连接到微软的激活服务器。如果你的网络无法访问微软服务器，这个方法会报错。</div>
+    </div>
+  </div>
+</li>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>KMS 批量激活</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <h4>KMS 是什么</h4>
+      <p>KMS（Key Management Service）是微软对大客户的批量授权方式。客户端定期向 KMS 服务器报到，每次激活有效期 180 天，服务器在任期内自动续签。</p>
+    </div>
+    <div class="tree-card">
+      <h4>操作步骤</h4>
+      <ol>
+        <li>管理员 CMD 输入：<br><code>slmgr /skms kms.xxxx.xxx</code><br>（把 xxx 部分换成可用的 KMS 服务器地址）</li>
+        <li>再输入：<br><code>slmgr /ato</code></li>
+        <li>看到"已成功激活"即完成</li>
+      </ol>
+    </div>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>查看激活状态 / 过期时间</div>
+  <div class="tree-children">
+    <div class="tree-card">
+      <h4>常用 slmgr 命令</h4>
+      <table><tr><th>命令</th><th>作用</th></tr><tr><td><code>slmgr /xpr</code></td><td>查看当前激活/期限（弹窗）</td></tr><tr><td><code>slmgr /dli</code></td><td>显示授权详细（控制台）</td></tr><tr><td><code>slmgr /dlv</code></td><td>列出所有授权信息含最后登录/激活次数</td></tr><tr><td><code>slmgr /ato</code></td><td>强制重新联网请求激活验证</td></tr><tr><td><code>slmgr /skms [servert域名]</code></td><td>指定 KMS 服务器</td></tr></table>
+    </div>
+  </div>
+</li>
+
+</ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+
+

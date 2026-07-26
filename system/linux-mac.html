@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Linux 与 macOS 入门科普 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+</head><body>
+<header class="topbar"><div class="container">
+  <a href="../index.html" class="logo">电脑知识百科</a>
+  <nav class="nav"><a href="../index.html">首页</a><a href="../hardware/index.html">硬件</a><a href="index.html">系统</a><a href="../software/index.html">软件</a><a href="#" onclick="communityOpen()">社区</a></nav>
+  <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
+</div></header>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">系统</a> / <span>Linux 与 macOS</span></div></div>
+<article class="article">
+<h1>Linux 与 macOS 入门科普</h1>
+
+
+<h2>1. Linux 发行版定位与选择</h2>
+<table><tr><th>发行版</th><th>定位</th><th>适合谁</th><th>包管理方式</th></tr>
+<tr><td>Ubuntu</td><td>主流入门、软件库庞大</td><td>新手 | 开发 | 日常办公</td><td><code>apt</code></td></tr>
+<tr><td>Linux Mint</td><td>Cinnamon 桌面环境继承 Win 体验</td><td>刚从 Windows 迁出的用户</td><td><code>apt</code></td></tr>
+<tr><td>Fedora</td><td>追踪最新开源技术</td><td>喜欢尝鲜和容器/Kubernetes 的开发者</td><td><code>dnf</code></td></tr>
+</table>
+
+<h2>2. 终端常用姿势</h2>
+<pre><code># 系统更新
+sudo apt update &&amp; sudo apt upgrade -y    (Ubuntu/Mint)
+sudo dnf update -y                         (Fedora)
+
+# 服务管理（systemd）
+sudo systemctl start nginx
+sudo systemctl enable ssh
+
+# 磁盘查看
+lsblk -f
+df -h</code></pre>
+<h2>3. WSL2——在 Windows 中运行真实 Linux 内核</h2>
+<p><strong>Windows Subsystem for Linux 2</strong> 为 Windows 用户提供了原生 Linux 终端，支持 Docker 和 CUDA 加速，可通过 <code>wsl --install</code> 一键部署 Ubuntu。文件互通在 <code>/mnt/c</code> 目录完成。</p>
+
+<h2>4. macOS 系统</h2>
+<p>macOS 基于 Darwin 内核，是 UNIX 认证系统。这使得原生终端（zsh）可以运行常见 Linux 命令。Homebrew 是类 Linux 包管理器，让 Python、Git、VS Code 等安装变得更快。Time Machine 快照备份仅需外接硬盘。</p>
+
+<h2>5. 跨平台差异化</h2>
+<ul><li>Linux 文件路径区分大小写。<br>Windows 可无视。<br>macOS 默认也区分+支持 APFS snapshot 版本控制。</li><li><strong>PATH 环境变量</strong>熟悉下 <code>/usr/local/bin</code> 的位置——许多 .js 解释器通过它加载。</li></ul>
+</article>
+<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<script src="../js/app.js"></script>
+</body></html>
+
+
+
+
+
+
+
+
