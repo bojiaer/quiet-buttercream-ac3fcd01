@@ -1,4 +1,4 @@
-﻿// Minimal JWT helper using Web Crypto API for Vercel Edge runtime
+// Minimal JWT helper using Web Crypto API for Vercel Edge runtime
 
 async function base64url(buf) {
   const b = typeof buf === "string" ? new TextEncoder().encode(buf) : new Uint8Array(buf);

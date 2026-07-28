@@ -1,4 +1,4 @@
-﻿/* ====================== PAGES INDEX ====================== */
+/* ====================== PAGES INDEX ====================== */
 var pagesIndex = [ 
   {title:"Python",               path:"software/python.html",      tags:["软件"], kw:"python 编程 依赖 stable diffusion comfyui"},
   {title:"Windows 激活方法",   path:"system/activation.html",   tags:["系统"], kw:"激活 kms slmgr 数字许可证 命令行"},
