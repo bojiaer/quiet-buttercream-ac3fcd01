@@ -3,11 +3,12 @@
 // No Supabase keys exposed to frontend
 
 // Change this after deploying your Worker
-var API_BASE = "https://computer-knowledge-api.yaojinguan.workers.dev";
+var API_BASE = "/.netlify/functions/api";
 // Or use local proxy for dev: "http://localhost:8787"
 
 // ====== AUTH STATE ======
 var currentUser = null;
+var token = null;
 // token declared below in loadSession
 
 function loadSession() {
@@ -92,11 +93,11 @@ function fmtNow() {
 async function sendLoginCode() {
   var emailInput = document.getElementById("loginEmail");
   var email = emailInput.value.trim();
-  if (!email) { alert("\u8bf7\u8f93\u5165\u90ae\u7bb1"); return; }
+  if (!email) { alert("请输入邮箱"); return; }
 
   var btn = event.target;
   btn.disabled = true;
-  btn.textContent = "\u53d1\u9001\u4e2d...";
+  btn.textContent = "发送中...";
 
   try {
     await apiPost("/api/auth/send-code", { email: email });
@@ -104,10 +105,10 @@ async function sendLoginCode() {
     document.getElementById("loginStep2").style.display = "";
     document.getElementById("loginEmailDisplay").textContent = email;
   } catch(e) {
-    alert("\u53d1\u9001\u5931\u8d25: " + e.message);
+    alert("发送失败: " + e.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = "\u53d1\u9001\u9a8c\u8bc1\u7801";
+    btn.textContent = "发送验证码";
   }
 }
 
@@ -115,11 +116,11 @@ async function sendLoginCode() {
 async function verifyLoginCode() {
   var email = document.getElementById("loginEmail").value.trim();
   var code = document.getElementById("loginCode").value.trim();
-  if (!code) { alert("\u8bf7\u8f93\u5165\u9a8c\u8bc1\u7801"); return; }
+  if (!code) { alert("请输入验证码"); return; }
 
   var btn = event.target;
   btn.disabled = true;
-  btn.textContent = "\u9a8c\u8bc1\u4e2d...";
+  btn.textContent = "验证中...";
 
   try {
     var data = await apiPost("/api/auth/verify-code", { email: email, code: code });
@@ -129,10 +130,10 @@ async function verifyLoginCode() {
     loginClose();
     updateUserUI();
   } catch(e) {
-    alert("\u9a8c\u8bc1\u5931\u8d25: " + e.message);
+    alert("验证失败: " + e.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = "\u767b\u5165";
+    btn.textContent = "登录";
   }
 }
 
@@ -443,7 +444,7 @@ async function renderC() {
       var tagText = p.tag || "\u672a\u5206\u7c7b";
       var bodyText = (p.body || "").slice(0, 80);
       var pid = p.id;
-      html += '<div class="note" style="left:' + x + '%;top:' + y + '%;transform:rotate(' + rot + 'deg);animation-delay:' + del + 's;border-left:4px solid ' + c + ';" onclick="openReply(\'' + pid + '\')"><div class="del-btn" onclick="event.stopPropagation();deletePost(\'' + pid + '\')">x</div><div class="note-tag" style="color:' + c + '">#' + tagText + '</div><div class="body">' + bodyText + '</div><div class="time">' + dateStr + (rc > 0 ? " \u00b7 " + rc + " \u015b\u015e\u015f\u015e" : "") + "</div></div>";
+      html += '<div class="note" style="left:' + x + '%;top:' + y + '%;transform:rotate(' + rot + 'deg);animation-delay:' + del + 's;border-left:4px solid ' + c + ';" onclick="openReply(\'' + pid + '\')"><div class="del-btn" onclick="event.stopPropagation();deletePost(\'' + pid + '\')">x</div><div class="note-tag" style="color:' + c + '">#' + tagText + '</div><div class="body">' + bodyText + '</div><div class="time">' + dateStr + (rc > 0 ? " \u00b7 " + rc + " 回复" : "") + "</div></div>";
     } else {
       html += '<div class="note empty-note" style="left:' + x + '%;top:' + y + '%;transform:rotate(' + rot + 'deg);animation-delay:' + del + 's;border-left:4px solid ' + c + ';">\u0154\u0165\u015d\u016a\u0157\u015e...</div>';
     }
@@ -466,10 +467,10 @@ function communityPostClose() {
 }
 
 async function communityPost() {
-  if (!isLoggedIn()) { alert("\u6cbf\u5148\u767b\u5f55\u518d\u53d1\u5e16"); return; }
+  if (!isLoggedIn()) { alert("请先登录再发帖"); return; }
   var body = document.getElementById("postBody").value.trim();
   var tag = document.getElementById("postTag").value.trim() || "\u672a\u5206\u7c7b";
-  if (!body) return alert("\u5185\u0169\u4e0d\u80fd\u4e3a\u7a7a");
+  if (!body) return alert("内容不能为空");
 
   var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   try {
@@ -477,15 +478,15 @@ async function communityPost() {
     communityPostClose();
     currentTag = null;
     renderC();
-  } catch(e) { alert("\u53d1\u5e03\u5931\u8d25: " + e.message); }
+  } catch(e) { alert("发布失败: " + e.message); }
 }
 
 async function deletePost(id) {
-  if (!confirm("\u5bec\u8a0e\u8fd9\u676f\u8ba8\u8aea\u7ffc\uff1f")) return;
+  if (!confirm("确认删除这条讨论？")) return;
   try {
     await apiDelete("/api/posts/" + id);
     renderC();
-  } catch(e) { alert("\u5220\u9664\u5931\u8d25: " + e.message); }
+  } catch(e) { alert("删除失败: " + e.message); }
 }
 
 // ---- Reply ----
@@ -507,15 +508,15 @@ async function openReply(postId) {
   for (var j = 0; j < replies.length; j++) {
     rh += '<div class="reply-item"><span class="reply-ts">' + replies[j].ts + '</span><span class="reply-text">' + replies[j].body + '</span></div>';
   }
-  document.getElementById("replyList").innerHTML = rh || '<div class="reply-empty">\u0155\u0170\u0161\u0162\u015a\u016f\u0161\u0163\uff0c\u016d\u0165\u015d\u0157\u015f\u0167\u0163\u0069\u006c\u0069\u006d\u0069\u0123\u006f\u0069\u0063\u0061\u0069\u0123\u0069</div>';
+  document.getElementById("replyList").innerHTML = rh || '<div class="reply-empty">暂无回复，来写第一条</div>';
   document.getElementById("replyModal").classList.add("open");
 }
 
 async function replyPost() {
-  if (!isLoggedIn()) { alert("\u6cbf\u5148\u767b\u5f55\u518d\u0159\u015e\u015f\u015e"); return; }
+  if (!isLoggedIn()) { alert("请先登录再回复"); return; }
   var postId = document.getElementById("replyPostId").value;
   var text = document.getElementById("replyInput").value.trim();
-  if (!text) return alert("\u0159\u0105\u015e\u015f\u015e\u0163\u0161\u0162\u013b\u0170\u0161\u0163");
+  if (!text) return alert("回复不能为空");
 
   var posts = [];
   try { posts = await loadPosts(); } catch(e) { return; }
@@ -528,7 +529,7 @@ async function replyPost() {
         document.getElementById("replyInput").value = "";
         replyClose();
         renderC();
-      } catch(e) { alert("\u0159\u015e\u015f\u015e\u0163\u016e\u0161\u0163"); }
+      } catch(e) { alert("回复失败: " + e.message); }
       break;
     }
   }
