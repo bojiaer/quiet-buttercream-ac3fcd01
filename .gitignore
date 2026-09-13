@@ -6,3 +6,5 @@ node_modules/
 *.log
 workers/node_modules/
 workers/.wrangler/
+
+workers/admin_key.txt
