@@ -5,9 +5,8 @@
   node_bundler = "esbuild"
 
 # 同源代理：浏览器只访问 netlify.app，由 Netlify 边缘转发到 Cloudflare Worker（D1 数据库）
-# 部署 Worker 后，把 YOUR_CF_SUBDOMAIN 换成你的 workers.dev 子域名
 [[redirects]]
   from = "/api/*"
-  to = "https://computer-knowledge-api.YOUR_CF_SUBDOMAIN.workers.dev/api/:splat"
+  to = "https://computer-knowledge-api.yaojinguan.workers.dev/api/:splat"
   status = 200
   force = true
