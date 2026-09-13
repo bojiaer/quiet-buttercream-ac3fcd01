@@ -3,47 +3,40 @@
 // No Supabase keys exposed to frontend
 
 // Change this after deploying your Worker
-var API_BASE = "/api"; // 同源代理：Netlify _redirects 转发到 Cloudflare Worker
+var API_BASE = "/api"; // 同源代理：Netlify 转发到 Cloudflare Worker
 // Or use local proxy for dev: "http://localhost:8787"
 
-// ====== AUTH STATE ======
-var currentUser = null;
-var token = null;
-// token declared below in loadSession
+// ====== PROFILE（匿名模式）======
+// 每个浏览器一个随机 uid，用来标识「自己发的帖子」（删除权限用）
+// 昵称可自定义，默认「匿名」
+var myUid = null;
+var myNick = null;
 
-function loadSession() {
+function loadProfile() {
   try {
-    var s = JSON.parse(localStorage.getItem("ck_session") || "{}");
-    if (s && s.token && s.user) {
-      token = s.token;
-      currentUser = s.user;
-    }
+    var s = JSON.parse(localStorage.getItem("ck_profile") || "{}");
+    if (s && s.uid) { myUid = s.uid; myNick = s.nick || ""; }
   } catch(e) {}
+  if (!myUid) {
+    myUid = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    myNick = "";
+    saveProfile();
+  }
 }
 
-function saveSession() {
-  localStorage.setItem("ck_session", JSON.stringify({ token: token, user: currentUser }));
+function saveProfile() {
+  localStorage.setItem("ck_profile", JSON.stringify({ uid: myUid, nick: myNick }));
 }
 
-function clearSession() {
-  token = null;
-  currentUser = null;
-  localStorage.removeItem("ck_session");
-}
-
-function isLoggedIn() {
-  return !!(token && currentUser);
-}
-
-function getUserEmail() {
-  return currentUser ? currentUser.email : "";
+function getNick() {
+  return (myNick || "").trim() || "\u533f\u540d"; // 匿名
 }
 
 // ====== API HELPERS ======
 async function api(path, options) {
   var opts = options || {};
   var headers = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = "Bearer " + token;
+  if (myUid) headers["X-UID"] = myUid;
   if (opts.headers) Object.assign(headers, opts.headers);
 
   var res = await fetch(API_BASE + path, {
@@ -87,253 +80,261 @@ function fmtNow() {
 }
 
 
-// ====== AUTH FLOWS ======
-
-// Step 1: Request verification code
-async function sendLoginCode() {
-  var emailInput = document.getElementById("loginEmail");
-  var email = emailInput.value.trim();
-  if (!email) { alert("鐠囩柉绶崗銉╁仏缁?); return; }
-
-  var btn = event.target;
-  btn.disabled = true;
-  btn.textContent = "閸欐垿鈧椒鑵?..";
-
-  try {
-    await apiPost("/api/auth/send-code", { email: email });
-    document.getElementById("loginStep1").style.display = "none";
-    document.getElementById("loginStep2").style.display = "";
-    document.getElementById("loginEmailDisplay").textContent = email;
-  } catch(e) {
-    alert("閸欐垿鈧礁銇戠拹? " + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "閸欐垿鈧線鐛欑拠浣虹垳";
+// ====== NICKNAME UI ======
+function showNick() {
+  var m = document.getElementById("nickModal");
+  if (!m) {
+    var n = prompt("\u8f93\u5165\u6635\u79f0\uff08\u7559\u7a7a\u4e3a\u533f\u540d\uff09\uff1a");
+    if (n !== null) { myNick = n.trim().slice(0, 20); saveProfile(); updateUserUI(); }
+    return;
   }
+  m.classList.add("open");
+  document.getElementById("nickInput").value = myNick || "";
 }
 
-// Step 2: Verify code and login
-async function verifyLoginCode() {
-  var email = document.getElementById("loginEmail").value.trim();
-  var code = document.getElementById("loginCode").value.trim();
-  if (!code) { alert("鐠囩柉绶崗銉╃崣鐠囦胶鐖?); return; }
-
-  var btn = event.target;
-  btn.disabled = true;
-  btn.textContent = "妤犲矁鐦夋稉?..";
-
-  try {
-    var data = await apiPost("/api/auth/verify-code", { email: email, code: code });
-    token = data.token;
-    currentUser = data.user;
-    saveSession();
-    loginClose();
-    updateUserUI();
-  } catch(e) {
-    alert("妤犲矁鐦夋径杈Е: " + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "閻ц缍?;
-  }
+function nickClose() {
+  document.getElementById("nickModal").classList.remove("open");
 }
 
-function logout() {
-  clearSession();
+function nickSave() {
+  myNick = document.getElementById("nickInput").value.trim().slice(0, 20);
+  saveProfile();
+  nickClose();
   updateUserUI();
 }
 
-// UI
-function showLogin() {
-  var m = document.getElementById("loginModal");
-  if (m) m.classList.add("open");
-  document.getElementById("loginStep1").style.display = "";
-  document.getElementById("loginStep2").style.display = "none";
-  document.getElementById("loginEmail").value = "";
-  document.getElementById("loginCode").value = "";
-}
-
-function loginClose() {
-  document.getElementById("loginModal").classList.remove("open");
-}
-
 function updateUserUI() {
-  var email = getUserEmail();
   var btns = document.querySelectorAll(".auth-btn-area");
   for (var i = 0; i < btns.length; i++) {
-    if (email) {
-      btns[i].innerHTML = '<span class="tag-filter" style="color:var(--accent);border-color:var(--accent);">' + email + '</span>' +
-        '<button class="tag-filter" onclick="logout()">\u9000\u51fa</button>';
-    } else {
-      btns[i].innerHTML = '<button class="tag-filter" onclick="showLogin()" style="background:var(--accent,#7c6ff7);color:#fff;border:none;border-radius:8px;padding:6px 16px;font-size:.85rem;cursor:pointer;font-weight:600">\u767b\u5f55</button>';
+    btns[i].innerHTML = '<span class="tag-filter" style="color:var(--accent);border-color:var(--accent);">\u00b7 ' + getNick() + '</span>' +
+      '<button class="tag-filter" onclick="showNick()">\u6539\u6635\u79f0</button>' +
+      '<button class="tag-filter" onclick="toggleAdmin()"' + (myAdminKey ? ' style="background:rgba(255,82,82,.18);color:#ff5252;border-color:rgba(255,82,82,.5);"' : '') + '>' + (myAdminKey ? '\u7ba1\u7406\u5458:\u5f00' : '\u7ba1\u7406\u5458') + '</button>';
+  }
+}
+
+// ====== 管理员模式 ======
+// 密钥校验走后端 /api/admin/check；开启后可删除任何帖子
+var myAdminKey = null;
+
+function loadAdminKey() {
+  try { myAdminKey = localStorage.getItem("ck_admin_key") || null; } catch(e) {}
+}
+
+function saveAdminKey() {
+  try {
+    if (myAdminKey) localStorage.setItem("ck_admin_key", myAdminKey);
+    else localStorage.removeItem("ck_admin_key");
+  } catch(e) {}
+}
+
+async function toggleAdmin() {
+  if (myAdminKey) {
+    if (confirm("\u7ba1\u7406\u5458\u6a21\u5f0f\u5df2\u5f00\u542f\uff0c\u8981\u9000\u51fa\u5417\uff1f")) {
+      myAdminKey = null; saveAdminKey(); updateUserUI();
+    }
+    return;
+  }
+  var k = prompt("\u8f93\u5165\u7ba1\u7406\u5458\u5bc6\u94a5\uff1a");
+  if (!k) return;
+  try {
+    var r = await fetch(API_BASE + "/api/admin/check", { headers: { "X-Admin-Key": k.trim() } });
+    var d = await r.json();
+    if (d.admin) { myAdminKey = k.trim(); saveAdminKey(); updateUserUI(); alert("\u7ba1\u7406\u5458\u6a21\u5f0f\u5df2\u5f00\u542f\uff0c\u53ef\u5220\u9664\u4efb\u4f55\u5e16\u5b50"); }
+    else alert("\u5bc6\u94a5\u9519\u8bef");
+  } catch(e) { alert("\u9a8c\u8bc1\u5931\u8d25: " + e.message); }
+}
+
+// ====== TURNSTILE（人机验证）======
+// 占位 sitekey 是 Cloudflare 官方测试密钥（本地永远通过）；
+// 后端联调阶段替换为正式 sitekey，并由 Worker 在服务端校验 token。
+var TURNSTILE_SITEKEY = "1x00000000000000000000AA";
+var tsWidgets = {};
+
+function renderTurnstile() {
+  if (typeof turnstile === "undefined") return;
+  var boxes = document.querySelectorAll(".cf-turnstile");
+  for (var i = 0; i < boxes.length; i++) {
+    var key = boxes[i].dataset.key || ("ts" + i);
+    if (tsWidgets[key] === undefined) {
+      tsWidgets[key] = turnstile.render(boxes[i], { sitekey: TURNSTILE_SITEKEY });
     }
   }
 }
 
+function getTurnstileToken(key) {
+  if (typeof turnstile === "undefined" || tsWidgets[key] === undefined) return null;
+  return turnstile.getResponse(tsWidgets[key]) || null;
+}
+
+function resetTurnstile(key) {
+  if (typeof turnstile !== "undefined" && tsWidgets[key] !== undefined) turnstile.reset(tsWidgets[key]);
+}
+
 // ====== SEARCH INDEX ======
 var pagesIndex = [
-  {t:"CPU / i3 閳?閸忋儵妫?/ 鏉炶濮欓崗?,p:"hardware/cpu.html",kw:"cpu i3 閳?閸忋儵妫?/ 鏉炶濮欓崗?婢跺嫮鎮婇崳?i3"},
-  {t:"CPU / i5 閳?娑撶粯绁﹂幀褑鍏?,p:"hardware/cpu.html",kw:"cpu i5 閳?娑撶粯绁﹂幀褑鍏?婢跺嫮鎮婇崳?i5"},
-  {t:"CPU / i7 閳?妤傛顏径姘崲閸?,p:"hardware/cpu.html",kw:"cpu i7 閳?妤傛顏径姘崲閸?婢跺嫮鎮婇崳?i7"},
-  {t:"CPU / i9 閳?閺冩鍩岄弸渚€妾洪幀褑鍏?,p:"hardware/cpu.html",kw:"cpu i9 閳?閺冩鍩岄弸渚€妾洪幀褑鍏?婢跺嫮鎮婇崳?i9"},
-  {t:"CPU / Core Ultra 5 / 7 / 9",p:"hardware/cpu.html",kw:"cpu core ultra 5 / 7 / 9 婢跺嫮鎮婇崳?core ultra 5 7 9 ore ltra tra"},
-  {t:"CPU / Ryzen 3 閳?閸忋儵妫?,p:"hardware/cpu.html",kw:"cpu ryzen 3 閳?閸忋儵妫?婢跺嫮鎮婇崳?ryzen 3 yzen zen"},
-  {t:"CPU / Ryzen 5 閳?娑撶粯绁﹂悽婊呭仯",p:"hardware/cpu.html",kw:"cpu ryzen 5 閳?娑撶粯绁﹂悽婊呭仯 婢跺嫮鎮婇崳?ryzen 5 yzen zen"},
-  {t:"CPU / Ryzen 7 閳?妤傛ɑ鏅ユ径姘壋",p:"hardware/cpu.html",kw:"cpu ryzen 7 閳?妤傛ɑ鏅ユ径姘壋 婢跺嫮鎮婇崳?ryzen 7 yzen zen"},
-  {t:"CPU / Ryzen 9 閳?濡楀矂娼伴弮妤勫煂",p:"hardware/cpu.html",kw:"cpu ryzen 9 閳?濡楀矂娼伴弮妤勫煂 婢跺嫮鎮婇崳?ryzen 9 yzen zen"},
-  {t:"GPU / XX50 缁?閳?閸忋儵妫崡?,p:"hardware/gpu.html",kw:"gpu xx50 缁?閳?閸忋儵妫崡?閺勬儳宕?閸ユ儳鑸伴崡?xx50 x50"},
-  {t:"GPU / XX60 缁?閳?閻㈡粎鍋ｇ痪褝绱欑憗鍛簚閺堚偓婢堆傜秼闁插骏绱?,p:"hardware/gpu.html",kw:"gpu xx60 缁?閳?閻㈡粎鍋ｇ痪褝绱欑憗鍛簚閺堚偓婢堆傜秼闁插骏绱?閺勬儳宕?閸ユ儳鑸伴崡?xx60 x60"},
-  {t:"GPU / XX70 缁?閳?妤傛顏挧閿嬵劄",p:"hardware/gpu.html",kw:"gpu xx70 缁?閳?妤傛顏挧閿嬵劄 閺勬儳宕?閸ユ儳鑸伴崡?xx70 x70"},
-  {t:"GPU / XX80 缁?閳?濞嗏剝妫楅懜?,p:"hardware/gpu.html",kw:"gpu xx80 缁?閳?濞嗏剝妫楅懜?閺勬儳宕?閸ユ儳鑸伴崡?xx80 x80"},
-  {t:"GPU / XX90 缁?閳?閸楋紕娈?,p:"hardware/gpu.html",kw:"gpu xx90 缁?閳?閸楋紕娈?閺勬儳宕?閸ユ儳鑸伴崡?xx90 x90"},
-  {t:"GPU / 30 缁?(Ampere)閳?0 缁?(Ada Lovelace)閳?0 缁?(Blackwell, 2025+)",p:"hardware/gpu.html",kw:"gpu 30 缁?(ampere)閳?0 缁?(ada lovelace)閳?0 缁?(blackwell, 2025+) 閺勬儳宕?閸ユ儳鑸伴崡?30 ampere 40 ada lovelace 50 blackwell 2025 mpere pere ere ovelace velace elace lace ace lackwell ackwell ckwell kwell well ell 025"},
-  {t:"GPU / RX X600 缁狙€鍟媂700(閻㈡粎鍋?閳壔800(濞嗏剝妫楅懜?閳壔900(閺冩鍩?",p:"hardware/gpu.html",kw:"gpu rx x600 缁狙€鍟媥700(閻㈡粎鍋?閳姸800(濞嗏剝妫楅懜?閳姸900(閺冩鍩? 閺勬儳宕?閸ユ儳鑸伴崡?rx x600 x700 x800 x900 600 700 800 900"},
-  {t:"GPU / Arc A300 / A500 / A700 閳?Battlemage (B 缁鍨?",p:"hardware/gpu.html",kw:"gpu arc a300 / a500 / a700 閳?battlemage (b 缁鍨? 閺勬儳宕?閸ユ儳鑸伴崡?arc a300 a500 a700 battlemage b 300 500 700 attlemage ttlemage tlemage lemage emage mage age"},
-  {t:"GPU / 棣冨娇 娑撯偓缁惧灝銇囬崢鍌︾礄瀹搞儳鈻肩粔顖滅柈濞ｅ崬甯ら敍?,p:"hardware/gpu.html",kw:"gpu 棣冨娇 娑撯偓缁惧灝銇囬崢鍌︾礄瀹搞儳鈻肩粔顖滅柈濞ｅ崬甯ら敍?閺勬儳宕?閸ユ儳鑸伴崡?},
-  {t:"GPU / 棣冨娇 娑擃厼娴楁稉鏄忣洣閸濅胶澧?,p:"hardware/gpu.html",kw:"gpu 棣冨娇 娑擃厼娴楁稉鏄忣洣閸濅胶澧?閺勬儳宕?閸ユ儳鑸伴崡?},
-  {t:"GPU / 棣冨娇 閸忔湹绮划楣冣偓澶婃惂閻?,p:"hardware/gpu.html",kw:"gpu 棣冨娇 閸忔湹绮划楣冣偓澶婃惂閻?閺勬儳宕?閸ユ儳鑸伴崡?},
-  {t:"GPU / 鐢箑顔旈崗顒€绱?,p:"hardware/gpu.html",kw:"gpu 鐢箑顔旈崗顒€绱?閺勬儳宕?閸ユ儳鑸伴崡?},
-  {t:"GPU / 閹恒劏宕樻径褍鐨?,p:"hardware/gpu.html",kw:"gpu 閹恒劏宕樻径褍鐨?閺勬儳宕?閸ユ儳鑸伴崡?},
-  {t:"娑撶粯婢?/ H610 閳?閸忋儵妫痪?,p:"hardware/motherboard.html",kw:"娑撶粯婢?h610 閳?閸忋儵妫痪?娑撶粯婢樻稉搴㈡簚缁?h610 610"},
-  {t:"娑撶粯婢?/ B760 閳?娑撶粯绁?,p:"hardware/motherboard.html",kw:"娑撶粯婢?b760 閳?娑撶粯绁?娑撶粯婢樻稉搴㈡簚缁?b760 760"},
-  {t:"娑撶粯婢?/ Z790 閳?閺冩鍩?,p:"hardware/motherboard.html",kw:"娑撶粯婢?z790 閳?閺冩鍩?娑撶粯婢樻稉搴㈡簚缁?z790 790"},
-  {t:"娑撶粯婢?/ A620 閳?閸忋儵妫?(AM5)",p:"hardware/motherboard.html",kw:"娑撶粯婢?a620 閳?閸忋儵妫?(am5) 娑撶粯婢樻稉搴㈡簚缁?a620 am5 620"},
-  {t:"娑撶粯婢?/ B650 / B650E 閳?娑撶粯绁?,p:"hardware/motherboard.html",kw:"娑撶粯婢?b650 / b650e 閳?娑撶粯绁?娑撶粯婢樻稉搴㈡簚缁?b650 b650e 650 650e 50e"},
-  {t:"娑撶粯婢?/ X670 / X670E 閳?閺冩鍩?,p:"hardware/motherboard.html",kw:"娑撶粯婢?x670 / x670e 閳?閺冩鍩?娑撶粯婢樻稉搴㈡簚缁?x670 x670e 670 670e 70e"},
-  {t:"娑撶粯婢?/ 棣冩憲 鐢?WiFi 閻楀牊婀?,p:"hardware/motherboard.html",kw:"娑撶粯婢?棣冩憲 鐢?wifi 閻楀牊婀?娑撶粯婢樻稉搴㈡簚缁?wifi ifi"},
-  {t:"娑撶粯婢?/ 棣冩敳 娑撳秴鐢?WiFi 閻楀牊婀?,p:"hardware/motherboard.html",kw:"娑撶粯婢?棣冩敳 娑撳秴鐢?wifi 閻楀牊婀?娑撶粯婢樻稉搴㈡簚缁?wifi ifi"},
-  {t:"娑撶粯婢?/ Mini-ITX閿?70mm 鑴?170mm閿?,p:"hardware/motherboard.html",kw:"娑撶粯婢?mini-itx閿?70mm 鑴?170mm閿?娑撶粯婢樻稉搴㈡簚缁?mini itx 170mm ini 70mm 0mm"},
-  {t:"娑撶粯婢?/ Micro-ATX閿?44mm 鑴?244mm閿?,p:"hardware/motherboard.html",kw:"娑撶粯婢?micro-atx閿?44mm 鑴?244mm閿?娑撶粯婢樻稉搴㈡簚缁?micro atx 244mm icro cro 44mm 4mm"},
-  {t:"娑撶粯婢?/ Standard ATX閿?05mm 鑴?244mm閿?,p:"hardware/motherboard.html",kw:"娑撶粯婢?standard atx閿?05mm 鑴?244mm閿?娑撶粯婢樻稉搴㈡簚缁?standard atx 305mm 244mm tandard andard ndard dard ard 05mm 5mm 44mm 4mm"},
-  {t:"娑撶粯婢?/ Extended-ATX閿?05mm 鑴?277mm+閿?,p:"hardware/motherboard.html",kw:"娑撶粯婢?extended-atx閿?05mm 鑴?277mm+閿?娑撶粯婢樻稉搴㈡簚缁?extended atx 305mm 277mm xtended tended ended nded ded 05mm 5mm 77mm 7mm"},
-  {t:"娑撶粯婢?/ ITX 閺堣櫣顔?,p:"hardware/motherboard.html",kw:"娑撶粯婢?itx 閺堣櫣顔?娑撶粯婢樻稉搴㈡簚缁?itx"},
-  {t:"娑撶粯婢?/ M-ATX 閺堣櫣顔?,p:"hardware/motherboard.html",kw:"娑撶粯婢?m-atx 閺堣櫣顔?娑撶粯婢樻稉搴㈡簚缁?m atx"},
-  {t:"娑撶粯婢?/ ATX 娑擃厼顢?,p:"hardware/motherboard.html",kw:"娑撶粯婢?atx 娑擃厼顢?娑撶粯婢樻稉搴㈡簚缁?atx"},
-  {t:"娑撶粯婢?/ E-ATX 閸忋劌顢?,p:"hardware/motherboard.html",kw:"娑撶粯婢?e-atx 閸忋劌顢?娑撶粯婢樻稉搴㈡簚缁?e atx"},
-  {t:"閸愬懎鐡?/ 闁倻鏁ら崷鐑樻珯",p:"hardware/ram.html",kw:"閸愬懎鐡?闁倻鏁ら崷鐑樻珯 ram"},
-  {t:"閸愬懎鐡?/ 閸欏矂鈧岸浜?vs 閸ユ盯鈧岸浜?,p:"hardware/ram.html",kw:"閸愬懎鐡?閸欏矂鈧岸浜?vs 閸ユ盯鈧岸浜?ram vs"},
-  {t:"绾剛娲?/ SATA SSD",p:"hardware/storage.html",kw:"绾剛娲?sata ssd ssd hdd 绾句胶娲?sata ssd ata"},
-  {t:"绾剛娲?/ M.2 NVMe SSD",p:"hardware/storage.html",kw:"绾剛娲?m.2 nvme ssd ssd hdd 绾句胶娲?m 2 nvme ssd vme"},
-  {t:"绾剛娲?/ 婢堆冾啇闁插繐缍婂?,p:"hardware/storage.html",kw:"绾剛娲?婢堆冾啇闁插繐缍婂?ssd hdd 绾句胶娲?},
-  {t:"绾剛娲?/ CMR vs SMR",p:"hardware/storage.html",kw:"绾剛娲?cmr vs smr ssd hdd 绾句胶娲?cmr vs smr"},
-  {t:"閻㈠灚绨?/ 450W - 550W",p:"hardware/psu.html",kw:"閻㈠灚绨?450w - 550w 450w 550w 50w"},
-  {t:"閻㈠灚绨?/ 650W - 750W",p:"hardware/psu.html",kw:"閻㈠灚绨?650w - 750w 650w 750w 50w"},
-  {t:"閻㈠灚绨?/ 850W - 1200W",p:"hardware/psu.html",kw:"閻㈠灚绨?850w - 1200w 850w 1200w 50w 200w 00w"},
-  {t:"閻㈠灚绨?/ 棣冨殹棣冨毃 閺冦儲婀伴悽闈涱啇閿涘牊妫╃化鑽ゆ暩鐎圭櫢绱?,p:"hardware/psu.html",kw:"閻㈠灚绨?棣冨殹棣冨毃 閺冦儲婀伴悽闈涱啇閿涘牊妫╃化鑽ゆ暩鐎圭櫢绱?},
-  {t:"閻㈠灚绨?/ 棣冨毈棣冨毎 閸欑増鍜曢悽闈涱啇",p:"hardware/psu.html",kw:"閻㈠灚绨?棣冨毈棣冨毎 閸欑増鍜曢悽闈涱啇"},
-  {t:"閻㈠灚绨?/ 棣冨殮棣冨殾 婢堆囨閻㈤潧顔?,p:"hardware/psu.html",kw:"閻㈠灚绨?棣冨殮棣冨殾 婢堆囨閻㈤潧顔?},
-  {t:"閺侊絿鍎?/ 妞嬪骸鍠庨弫锝囧劰",p:"hardware/cooling.html",kw:"閺侊絿鍎?妞嬪骸鍠庨弫锝囧劰 妞嬪孩澧?濮樻潙鍠?},
-  {t:"閺侊絿鍎?/ 濮樻潙鍠庨弫锝囧劰",p:"hardware/cooling.html",kw:"閺侊絿鍎?濮樻潙鍠庨弫锝囧劰 妞嬪孩澧?濮樻潙鍠?},
-  {t:"閺侊絿鍎?/ 鐞氼偄濮╅弫锝囧劰",p:"hardware/cooling.html",kw:"閺侊絿鍎?鐞氼偄濮╅弫锝囧劰 妞嬪孩澧?濮樻潙鍠?},
-  {t:"閺侊絿鍎?/ 閸撳秴鎯涢崥搴㈠笓",p:"hardware/cooling.html",kw:"閺侊絿鍎?閸撳秴鎯涢崥搴㈠笓 妞嬪孩澧?濮樻潙鍠?},
-  {t:"閺侊絿鍎?/ 濮濓絽甯?vs 鐠愮喎甯?,p:"hardware/cooling.html",kw:"閺侊絿鍎?濮濓絽甯?vs 鐠愮喎甯?妞嬪孩澧?濮樻潙鍠?vs"},
-  {t:"婢舵牞顔?/ DPI (濮ｅ繗瀚崇€靛摜鍋ｉ弫?",p:"hardware/peripherals.html",kw:"婢舵牞顔?dpi (濮ｅ繗瀚崇€靛摜鍋ｉ弫? 闁款喚娲?姒х姵鐖?閺勫墽銇氶崳?dpi"},
-  {t:"婢舵牞顔?/ 閸ョ偞濮ら悳?(Polling Rate)",p:"hardware/peripherals.html",kw:"婢舵牞顔?閸ョ偞濮ら悳?(polling rate) 闁款喚娲?姒х姵鐖?閺勫墽銇氶崳?polling rate olling lling ling ing ate"},
-  {t:"婢舵牞顔?/ 棣冩惞 鐏忓搫顕柅鐔哥叀閿涘牆鐖剁憴浣稿棘閻撗呭⒖娴ｆ搫绱?,p:"hardware/peripherals.html",kw:"婢舵牞顔?棣冩惞 鐏忓搫顕柅鐔哥叀閿涘牆鐖剁憴浣稿棘閻撗呭⒖娴ｆ搫绱?闁款喚娲?姒х姵鐖?閺勫墽銇氶崳?},
-  {t:"婢舵牞顔?/ 棣冨腹 閼规彃鐓欑拠锕佇?,p:"hardware/peripherals.html",kw:"婢舵牞顔?棣冨腹 閼规彃鐓欑拠锕佇?闁款喚娲?姒х姵鐖?閺勫墽銇氶崳?},
-  {t:"婢舵牞顔?/ sRGB",p:"hardware/peripherals.html",kw:"婢舵牞顔?srgb 闁款喚娲?姒х姵鐖?閺勫墽銇氶崳?rgb"},
-  {t:"婢舵牞顔?/ DCI-P3閿涘牏鏁歌ぐ杈╅獓閼规彃鐓欓敍?,p:"hardware/peripherals.html",kw:"婢舵牞顔?dci-p3閿涘牏鏁歌ぐ杈╅獓閼规彃鐓欓敍?闁款喚娲?姒х姵鐖?閺勫墽銇氶崳?dci p3"},
-  {t:"婢舵牞顔?/ Adobe RGB",p:"hardware/peripherals.html",kw:"婢舵牞顔?adobe rgb 闁款喚娲?姒х姵鐖?閺勫墽銇氶崳?adobe rgb dobe obe"},
-  {t:"婢舵牞顔?/ 棣冩惗 闁妯夌粈鍝勬珤鐟曚胶婀呴惃鍕娑擃亜寮弫?,p:"hardware/peripherals.html",kw:"婢舵牞顔?棣冩惗 闁妯夌粈鍝勬珤鐟曚胶婀呴惃鍕娑擃亜寮弫?闁款喚娲?姒х姵鐖?閺勫墽銇氶崳?},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x0000007B 閳?INACCESSIBLE_BOOT_DEVICE",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x0000007b 閳?inaccessible_boot_device 閽冩繂鐫?bsod bugcheck bug 0x0000007b inaccessible boot device x0000007b 0000007b 000007b 00007b 0007b 007b 07b naccessible accessible ccessible cessible essible ssible sible ible ble oot evice vice ice"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x000000EA 閳?THREAD_STUCK_IN_DEVICE_DRIVER",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x000000ea 閳?thread_stuck_in_device_driver 閽冩繂鐫?bsod bugcheck bug 0x000000ea thread stuck in device driver x000000ea 000000ea 00000ea 0000ea 000ea 00ea 0ea hread read ead tuck uck evice vice ice river iver ver"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x00000050 閳?PAGE_FAULT_IN_NONPAGED_AREA",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x00000050 閳?page_fault_in_nonpaged_area 閽冩繂鐫?bsod bugcheck bug 0x00000050 page fault in nonpaged area x00000050 00000050 0000050 000050 00050 0050 050 age ault ult onpaged npaged paged aged ged rea"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x0000001A 閳?MEMORY_MANAGEMENT",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x0000001a 閳?memory_management 閽冩繂鐫?bsod bugcheck bug 0x0000001a memory management x0000001a 0000001a 000001a 00001a 0001a 001a 01a emory mory ory anagement nagement agement gement ement ment ent"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x000000D1 閳?DRIVER_IRQL_NOT_LESS_OR_EQUAL",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x000000d1 閳?driver_irql_not_less_or_equal 閽冩繂鐫?bsod bugcheck bug 0x000000d1 driver irql not less or equal x000000d1 000000d1 00000d1 0000d1 000d1 00d1 0d1 river iver ver rql ess qual ual"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x0000003B 閳?SYSTEM_SERVICE_EXCEPTION",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x0000003b 閳?system_service_exception 閽冩繂鐫?bsod bugcheck bug 0x0000003b system service exception x0000003b 0000003b 000003b 00003b 0003b 003b 03b ystem stem tem ervice rvice vice ice xception ception eption ption tion ion"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x0000009F 閳?DRIVER_POWER_STATE_FAILURE",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x0000009f 閳?driver_power_state_failure 閽冩繂鐫?bsod bugcheck bug 0x0000009f driver power state failure x0000009f 0000009f 000009f 00009f 0009f 009f 09f river iver ver ower wer tate ate ailure ilure lure ure"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x00000124 閳?WHEA_UNCORRECTABLE_ERROR",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x00000124 閳?whea_uncorrectable_error 閽冩繂鐫?bsod bugcheck bug 0x00000124 whea uncorrectable error x00000124 00000124 0000124 000124 00124 0124 124 hea ncorrectable correctable orrectable rrectable rectable ectable ctable table able ble rror ror"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x00000D1 閳?IRQL Drive...闁插秴顦查埆鎺旂暬閺冄呭閺堫剙鎯堥崗鏈电铂閸忓疇浠堥妴?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x00000d1 閳?irql drive...闁插秴顦查埆鎺旂暬閺冄呭閺堫剙鎯堥崗鏈电铂閸忓疇浠堥妴?閽冩繂鐫?bsod bugcheck bug 0x00000d1 irql drive x00000d1 00000d1 0000d1 000d1 00d1 0d1 rql rive ive"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0xC000021A 閳?STATUS_SYSTEM_PROCESS_TERMINATED",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0xc000021a 閳?status_system_process_terminated 閽冩繂鐫?bsod bugcheck bug 0xc000021a status system process terminated xc000021a c000021a 000021a 00021a 0021a 021a 21a tatus atus tus ystem stem tem rocess ocess cess ess erminated rminated minated inated nated ated ted"},
-  {t:"缁崵绮洪柨娆掝嚖 / CRITICAL_PROCESS_DIED",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 critical_process_died 閽冩繂鐫?bsod bugcheck bug critical process died ritical itical tical ical cal rocess ocess cess ess ied"},
-  {t:"缁崵绮洪柨娆掝嚖 / KERNEL_SECURITY_CHECK_FAILURE",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 kernel_security_check_failure 閽冩繂鐫?bsod bugcheck bug kernel security check failure ernel rnel nel ecurity curity urity rity ity heck eck ailure ilure lure ure"},
-  {t:"缁崵绮洪柨娆掝嚖 / 閺冪姵纭堕崥顖氬З濮濄倗鈻兼惔蹇ョ礉閸ョ姳璐熺拋锛勭暬閺堣桨鑵戞稉銏犮亼 xxx.dll",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 閺冪姵纭堕崥顖氬З濮濄倗鈻兼惔蹇ョ礉閸ョ姳璐熺拋锛勭暬閺堣桨鑵戞稉銏犮亼 xxx.dll 閽冩繂鐫?bsod bugcheck bug xxx dll"},
-  {t:"缁崵绮洪柨娆掝嚖 / 闁挎瑨顕?0x80070002 / 0x80070003 閳?閹靛彞绗夐崚鐗堟瀮娴?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 闁挎瑨顕?0x80070002 / 0x80070003 閳?閹靛彞绗夐崚鐗堟瀮娴?閽冩繂鐫?bsod bugcheck bug 0x80070002 0x80070003 x80070002 80070002 0070002 070002 70002 0002 002 x80070003 80070003 0070003 070003 70003 0003 003"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0xc0000225 閳?閹靛彞绗夐崚鏉挎儙閸斻劏顔曟径?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0xc0000225 閳?閹靛彞绗夐崚鏉挎儙閸斻劏顔曟径?閽冩繂鐫?bsod bugcheck bug 0xc0000225 xc0000225 c0000225 0000225 000225 00225 0225 225"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0xc000000F 閳?Windows 閸氼垰濮╃粻锛勬倞閸ｃ劑鏁婄拠?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0xc000000f 閳?windows 閸氼垰濮╃粻锛勬倞閸ｃ劑鏁婄拠?閽冩繂鐫?bsod bugcheck bug 0xc000000f windows xc000000f c000000f 000000f 00000f 0000f 000f 00f indows ndows dows ows"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x80004005 閳?閺堫亝瀵氶弰搴ｆ畱闁氨鏁ら柨娆掝嚖",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x80004005 閳?閺堫亝瀵氶弰搴ｆ畱闁氨鏁ら柨娆掝嚖 閽冩繂鐫?bsod bugcheck bug 0x80004005 x80004005 80004005 0004005 004005 04005 4005 005"},
-  {t:"缁崵绮洪柨娆掝嚖 / DNS 閺堝秴濮熼崳銊︽弓閸濆秴绨?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 dns 閺堝秴濮熼崳銊︽弓閸濆秴绨?閽冩繂鐫?bsod bugcheck bug dns"},
-  {t:"缁崵绮洪柨娆掝嚖 / ERR_CONNECTION_RESET / 鏉╃偞甯村鏌ュ櫢缂?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 err_connection_reset / 鏉╃偞甯村鏌ュ櫢缂?閽冩繂鐫?bsod bugcheck bug err connection reset onnection nnection nection ection ction tion ion eset set"},
-  {t:"缁崵绮洪柨娆掝嚖 / ERR_NAME_NOT_RESOLVED / 閺冪姵纭剁憴锝嗙€介張宥呭閸ｃ劌婀撮崸鈧?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 err_name_not_resolved / 閺冪姵纭剁憴锝嗙€介張宥呭閸ｃ劌婀撮崸鈧?閽冩繂鐫?bsod bugcheck bug err name not resolved ame esolved solved olved lved ved"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x800CCC0F 閳?闁喕娆㈢粩顖氬經閸戣櫣鐝悮顐ｅ皡",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x800ccc0f 閳?闁喕娆㈢粩顖氬經閸戣櫣鐝悮顐ｅ皡 閽冩繂鐫?bsod bugcheck bug 0x800ccc0f x800ccc0f 800ccc0f 00ccc0f 0ccc0f ccc0f cc0f c0f"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x80070020 閳?缁嬪绨锝呮躬娴ｈ法鏁?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x80070020 閳?缁嬪绨锝呮躬娴ｈ法鏁?閽冩繂鐫?bsod bugcheck bug 0x80070020 x80070020 80070020 0070020 070020 70020 0020 020"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x80072EE2  / 0x80072F8F 閳?閺冨爼妫挎稉搴㈡箛閸斺€虫珤娑撳秴鎮撳?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x80072ee2  / 0x80072f8f 閳?閺冨爼妫挎稉搴㈡箛閸斺€虫珤娑撳秴鎮撳?閽冩繂鐫?bsod bugcheck bug 0x80072ee2 0x80072f8f x80072ee2 80072ee2 0072ee2 072ee2 72ee2 2ee2 ee2 x80072f8f 80072f8f 0072f8f 072f8f 72f8f 2f8f f8f"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x800F0922 閳?婢额亜鐨惃鍕兇缂佺喍绻氶悾娆忓瀻閸?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x800f0922 閳?婢额亜鐨惃鍕兇缂佺喍绻氶悾娆忓瀻閸?閽冩繂鐫?bsod bugcheck bug 0x800f0922 x800f0922 800f0922 00f0922 0f0922 f0922 0922 922"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x8024200B 閳?閺囧瓨鏌婃稉瀣祰閹圭喎娼?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x8024200b 閳?閺囧瓨鏌婃稉瀣祰閹圭喎娼?閽冩繂鐫?bsod bugcheck bug 0x8024200b x8024200b 8024200b 024200b 24200b 4200b 200b 00b"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x800703EE (閺傚洣娆㈠Ч鈩冪厠)",p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x800703ee (閺傚洣娆㈠Ч鈩冪厠) 閽冩繂鐫?bsod bugcheck bug 0x800703ee x800703ee 800703ee 00703ee 0703ee 703ee 03ee 3ee"},
-  {t:"缁崵绮洪柨娆掝嚖 / 0x8007001F 閳?鐠佹儳顦張顏囩箥鐞涘苯鐣崗?,p:"system/errors.html",kw:"缁崵绮洪柨娆掝嚖 0x8007001f 閳?鐠佹儳顦張顏囩箥鐞涘苯鐣崗?閽冩繂鐫?bsod bugcheck bug 0x8007001f x8007001f 8007001f 007001f 07001f 7001f 001f 01f"},
-  {t:"Windows / 閻劍鍩涢悾宀勬桨娑撳簼姘︽禍鎺戝綁閸?,p:"system/win1011.html",kw:"windows 閻劍鍩涢悾宀勬桨娑撳簼姘︽禍鎺戝綁閸?win windows win"},
-  {t:"Windows / 绾兛娆㈡稉搴＄俺鐏炲倹鐏﹂弸鍕▕瀵?,p:"system/win1011.html",kw:"windows 绾兛娆㈡稉搴＄俺鐏炲倹鐏﹂弸鍕▕瀵?win windows win"},
-  {t:"Windows / 閹嗗厴娑撳骸鍚嬬€硅鈧?,p:"system/win1011.html",kw:"windows 閹嗗厴娑撳骸鍚嬬€硅鈧?win windows win"},
-  {t:"Windows / 閸楀洨楠囧楦款唴",p:"system/win1011.html",kw:"windows 閸楀洨楠囧楦款唴 win windows win"},
-  {t:"Windows / UEFI 鐎瑰鍙忕粵鏍殣",p:"system/win1011.html",kw:"windows uefi 鐎瑰鍙忕粵鏍殣 win windows win uefi efi"},
-  {t:"Windows / 濞夈劍鍓版禍瀣€?,p:"system/win1011.html",kw:"windows 濞夈劍鍓版禍瀣€?win windows win"},
-  {t:"Linux/macOS / Linux 閸欐垼顢戦悧鍫濈暰娴ｅ秳绗岄柅澶嬪",p:"system/linux-mac.html",kw:"linux/macos linux 閸欐垼顢戦悧鍫濈暰娴ｅ秳绗岄柅澶嬪 linux ubuntu macos mac os linux inux nux"},
-  {t:"Linux/macOS / 缂佸牏顏敮鍝ユ暏婵灝濞?,p:"system/linux-mac.html",kw:"linux/macos 缂佸牏顏敮鍝ユ暏婵灝濞?linux ubuntu macos mac os"},
-  {t:"Linux/macOS / WSL2閳ユ柡鈧柨婀?Windows 娑擃叀绻嶇悰宀€婀＄€?Linux 閸愬懏鐗?,p:"system/linux-mac.html",kw:"linux/macos wsl2閳ユ柡鈧柨婀?windows 娑擃叀绻嶇悰宀€婀＄€?linux 閸愬懏鐗?linux ubuntu macos mac os wsl2 windows linux sl2 indows ndows dows ows inux nux"},
-  {t:"Linux/macOS / macOS 缁崵绮?,p:"system/linux-mac.html",kw:"linux/macos macos 缁崵绮?linux ubuntu macos mac os macos acos cos"},
-  {t:"Linux/macOS / 鐠恒劌閽╅崣鏉挎▕瀵倸瀵?,p:"system/linux-mac.html",kw:"linux/macos 鐠恒劌閽╅崣鏉挎▕瀵倸瀵?linux ubuntu macos mac os"},
-  {t:"濠碘偓濞?/ 娴犫偓娑斿牊妲搁弫鏉跨摟鐠佺褰茬拠?,p:"system/activation.html",kw:"濠碘偓濞?娴犫偓娑斿牊妲搁弫鏉跨摟鐠佺褰茬拠?},
-  {t:"濠碘偓濞?/ 閹垮秳缍斿銉╊€?,p:"system/activation.html",kw:"濠碘偓濞?閹垮秳缍斿銉╊€?},
-  {t:"濠碘偓濞?/ KMS 閺勵垯绮堟稊?,p:"system/activation.html",kw:"濠碘偓濞?kms 閺勵垯绮堟稊?kms"},
-  {t:"濠碘偓濞?/ 鐢摜鏁?slmgr 閸涙垝鎶?,p:"system/activation.html",kw:"濠碘偓濞?鐢摜鏁?slmgr 閸涙垝鎶?slmgr lmgr mgr"},
-  {t:"娑撳娴?/ ISO 闂€婊冨剼娑撳娴囨い?,p:"system/download.html",kw:"娑撳娴?iso 闂€婊冨剼娑撳娴囨い?iso"},
-  {t:"娑撳娴?/ 鐎规ɑ鏌熷銉ュ徔闂?,p:"system/download.html",kw:"娑撳娴?鐎规ɑ鏌熷銉ュ徔闂?},
-  {t:"娑撳娴?/ 濠碘偓濞茶绗岀拋绋垮讲鐠?,p:"system/download.html",kw:"娑撳娴?濠碘偓濞茶绗岀拋绋垮讲鐠?},
-  {t:"AI Agent / 閺嶇绺鹃崠鍝勫焼閿涙I 閼卞﹤銇?vs AI Agent",p:"software/ai-agent.html",kw:"ai agent 閺嶇绺鹃崠鍝勫焼閿涙瓫i 閼卞﹤銇?vs ai agent ai vs agent gent ent"},
-  {t:"AI Agent / 棣冩崌 OpenAI Codex CLI",p:"software/ai-agent.html",kw:"ai agent 棣冩崌 openai codex cli openai codex cli penai enai nai odex dex"},
-  {t:"AI Agent / 閳戒緤绗?Claude Code",p:"software/ai-agent.html",kw:"ai agent 閳戒緤绗?claude code claude code laude aude ude ode"},
-  {t:"AI Agent / 棣冾樆 閸忔湹绮柌宥堫洣 Agent 瀹搞儱鍙?,p:"software/ai-agent.html",kw:"ai agent 棣冾樆 閸忔湹绮柌宥堫洣 agent 瀹搞儱鍙?agent gent ent"},
-  {t:"AI Agent / 棣冩斀 API Key = 娴ｇ姷娈戦弫鏉跨摟闊偂鍞ょ拠?,p:"software/ai-agent.html",kw:"ai agent 棣冩斀 api key = 娴ｇ姷娈戦弫鏉跨摟闊偂鍞ょ拠?api key"},
-  {t:"AI Agent / 棣冩惖 娴犲骸鎽㈤懗钘夊帳鐠愯瀣侀崚?API Key閿?,p:"software/ai-agent.html",kw:"ai agent 棣冩惖 娴犲骸鎽㈤懗钘夊帳鐠愯瀣侀崚?api key閿?api key"},
-  {t:"AI Agent / 棣冩憪 Rule閿涘牐顫夐崚娆欑礆= 娴ｇ姷绮?Agent 閸愭瑧娈戝▔鏇炵伐鐟欏嫬鐣?,p:"software/ai-agent.html",kw:"ai agent 棣冩憪 rule閿涘牐顫夐崚娆欑礆= 娴ｇ姷绮?agent 閸愭瑧娈戝▔鏇炵伐鐟欏嫬鐣?rule agent ule gent ent"},
-  {t:"AI Agent / 閸欙缚绔寸粔?Rule閿涙艾鐣鹃張鐔诲殰閸斻劍澧界悰?,p:"software/ai-agent.html",kw:"ai agent 閸欙缚绔寸粔?rule閿涙艾鐣鹃張鐔诲殰閸斻劍澧界悰?rule ule"},
-  {t:"AI Agent / 棣冨箚 Skill = 娑撯偓婵傛ぞ绗撶仦鐐垫畱鐠囧瓨妲戞稊?,p:"software/ai-agent.html",kw:"ai agent 棣冨箚 skill = 娑撯偓婵傛ぞ绗撶仦鐐垫畱鐠囧瓨妲戞稊?skill kill ill"},
-  {t:"AI Agent / 鐎圭偤妾笟瀣摍",p:"software/ai-agent.html",kw:"ai agent 鐎圭偤妾笟瀣摍"},
-  {t:"AI Agent / Token 閺勵垯绮堟稊?,p:"software/ai-agent.html",kw:"ai agent token 閺勵垯绮堟稊?token oken ken"},
-  {t:"AI Agent / RAG 閳?缂?AI 閺囧瓨婀佺€圭偞鏋￠惃鍕叀鐠?,p:"software/ai-agent.html",kw:"ai agent rag 閳?缂?ai 閺囧瓨婀佺€圭偞鏋￠惃鍕叀鐠?rag ai"},
-  {t:"GitHub / Star閿涘牊鏁归挊蹇ョ礆",p:"software/github.html",kw:"github star閿涘牊鏁归挊蹇ョ礆 瀵偓濠?git star tar"},
-  {t:"GitHub / Fork閿涘牆寮舵稉鈧崣澶涚礆",p:"software/github.html",kw:"github fork閿涘牆寮舵稉鈧崣澶涚礆 瀵偓濠?git fork ork"},
-  {t:"GitHub / Pull Request (PR)",p:"software/github.html",kw:"github pull request (pr) 瀵偓濠?git pull request pr ull equest quest uest est"},
-  {t:"GitHub / Issues",p:"software/github.html",kw:"github issues 瀵偓濠?git ssues sues ues"},
-  {t:"GitHub / 棣冨箥 GenP 閳?Adobe 濠碘偓濞叉槒藟娑?,p:"software/github.html",kw:"github 棣冨箥 genp 閳?adobe 濠碘偓濞叉槒藟娑?瀵偓濠?git genp adobe enp dobe obe"},
-  {t:"GitHub / 棣冾潵 LM Studio 閳?閸ユ儳鑸伴崠鏍ㄦ拱閸︽澘銇囧Ο鈥崇€风粻鈥愁啀",p:"software/github.html",kw:"github 棣冾潵 lm studio 閳?閸ユ儳鑸伴崠鏍ㄦ拱閸︽澘銇囧Ο鈥崇€风粻鈥愁啀 瀵偓濠?git lm studio tudio udio dio"},
-  {t:"GitHub / 棣冨腹 Stable Diffusion WebUI 閳?閺堫剙婀?AI 閻㈣娴橀敍鍫熺セ鐟欏牆娅掗悧鍫礆",p:"software/github.html",kw:"github 棣冨腹 stable diffusion webui 閳?閺堫剙婀?ai 閻㈣娴橀敍鍫熺セ鐟欏牆娅掗悧鍫礆 瀵偓濠?git stable diffusion webui ai table able ble iffusion ffusion fusion usion sion ion ebui bui"},
-  {t:"GitHub / 棣冩暛 ComfyUI 閳?閼哄倻鍋ｅ?AI 娴ｆ粌娴樺銉ょ稊濞?,p:"software/github.html",kw:"github 棣冩暛 comfyui 閳?閼哄倻鍋ｅ?ai 娴ｆ粌娴樺銉ょ稊濞?瀵偓濠?git comfyui ai omfyui mfyui fyui yui"},
-  {t:"GitHub / 棣冩礈 閸ユ儳鎯傚銉ュ徔缁?閳?閻絻鍓崇涵顑挎濡偓濞村鎮庨梿?,p:"software/github.html",kw:"github 棣冩礈 閸ユ儳鎯傚銉ュ徔缁?閳?閻絻鍓崇涵顑挎濡偓濞村鎮庨梿?瀵偓濠?git"},
-  {t:"GitHub / 棣冃?ImHex 閳?閸椾礁鍙氭潻娑樺煑閺傚洣娆㈢紓鏍帆閸?,p:"software/github.html",kw:"github 棣冃?imhex 閳?閸椾礁鍙氭潻娑樺煑閺傚洣娆㈢紓鏍帆閸?瀵偓濠?git imhex mhex hex"},
-  {t:"GitHub / 棣冩敯 OBS Studio 閳?閸忓秷鍨傞惄瀛樻尡/瑜版洖鐫?閹恒劍绁?,p:"software/github.html",kw:"github 棣冩敯 obs studio 閳?閸忓秷鍨傞惄瀛樻尡/瑜版洖鐫?閹恒劍绁?瀵偓濠?git obs studio tudio udio dio"},
-  {t:"GitHub / 棣冩惂 EverythingToolbar 閳?缁夋帞楠囬崗銊ф磸閺傚洣娆㈤幖婊呭偍",p:"software/github.html",kw:"github 棣冩惂 everythingtoolbar 閳?缁夋帞楠囬崗銊ф磸閺傚洣娆㈤幖婊呭偍 瀵偓濠?git everythingtoolbar verythingtoolbar erythingtoolbar rythingtoolbar ythingtoolbar thingtoolbar hingtoolbar ingtoolbar ngtoolbar gtoolbar toolbar oolbar olbar lbar bar"},
-  {t:"GitHub / 棣冨埃 PowerToys 閳?瀵邦喛钂嬬€规ɑ鏌熸晶鐐插繁婵傛ぞ娆?,p:"software/github.html",kw:"github 棣冨埃 powertoys 閳?瀵邦喛钂嬬€规ɑ鏌熸晶鐐插繁婵傛ぞ娆?瀵偓濠?git powertoys owertoys wertoys ertoys rtoys toys oys"},
-  {t:"鐎瑰鍙?/ 閻忣偆绮х€瑰鍙忔潪顖欐",p:"software/security.html",kw:"鐎瑰鍙?閻忣偆绮х€瑰鍙忔潪顖欐 閻ュ懏鐦?闂冭尙浼€婢?閺夆偓濮?},
-  {t:"鐎瑰鍙?/ 360 鐎瑰鍙忛崡顐紜",p:"software/security.html",kw:"鐎瑰鍙?360 鐎瑰鍙忛崡顐紜 閻ュ懏鐦?闂冭尙浼€婢?閺夆偓濮?360"},
-  {t:"鐎瑰鍙?/ 棣冾洴 闁惧墎瀚勯惀鍛槰 (Silver Fox)",p:"software/security.html",kw:"鐎瑰鍙?棣冾洴 闁惧墎瀚勯惀鍛槰 (silver fox) 閻ュ懏鐦?闂冭尙浼€婢?閺夆偓濮?silver fox ilver lver ver"},
-  {t:"鐎瑰鍙?/ 棣冩償 閺堛劑鈹堥惀鍛槰 (Trojan)",p:"software/security.html",kw:"鐎瑰鍙?棣冩償 閺堛劑鈹堥惀鍛槰 (trojan) 閻ュ懏鐦?闂冭尙浼€婢?閺夆偓濮?trojan rojan ojan jan"},
-  {t:"鐎瑰鍙?/ 閴€?閹告牜鐔嗛惀鍛槰 / CryptoJacking",p:"software/security.html",kw:"鐎瑰鍙?閴€?閹告牜鐔嗛惀鍛槰 / cryptojacking 閻ュ懏鐦?闂冭尙浼€婢?閺夆偓濮?cryptojacking ryptojacking yptojacking ptojacking tojacking ojacking jacking acking cking king ing"},
-  {t:"鐎瑰鍙?/ 棣冩晙 閸曟帞鍌ㄩ惀鍛槰 (Ransomware)",p:"software/security.html",kw:"鐎瑰鍙?棣冩晙 閸曟帞鍌ㄩ惀鍛槰 (ransomware) 閻ュ懏鐦?闂冭尙浼€婢?閺夆偓濮?ransomware ansomware nsomware somware omware mware ware are"},
-  {t:"鐎瑰鍙?/ 棣冩憴 濞翠焦鐨虫潪顖欐 / 楠炲灝鎲″鍦崶",p:"software/security.html",kw:"鐎瑰鍙?棣冩憴 濞翠焦鐨虫潪顖欐 / 楠炲灝鎲″鍦崶 閻ュ懏鐦?闂冭尙浼€婢?閺夆偓濮?},
-  {t:"缂冩垹绮?/ 閸ヨ棄鍞撮梹婊冨剼缁?,p:"software/network.html",kw:"缂冩垹绮?閸ヨ棄鍞撮梹婊冨剼缁?dns 娴狅絿鎮?缂堣顣?},
-  {t:"缂冩垹绮?/ Gitee 閸ヨ棄鍞撮崥灞绢劄",p:"software/network.html",kw:"缂冩垹绮?gitee 閸ヨ棄鍞撮崥灞绢劄 dns 娴狅絿鎮?缂堣顣?gitee itee tee"},
-  {t:"缂冩垹绮?/ arXiv 璺?鐠佺儤鏋冪拠鍡楀焼",p:"software/network.html",kw:"缂冩垹绮?arxiv 璺?鐠佺儤鏋冪拠鍡楀焼 dns 娴狅絿鎮?缂堣顣?arxiv rxiv xiv"},
-  {t:"缂冩垹绮?/ 鐠嬮攱鐡曠€涳附婀?/ Google Scholar",p:"software/network.html",kw:"缂冩垹绮?鐠嬮攱鐡曠€涳附婀?/ google scholar dns 娴狅絿鎮?缂堣顣?google scholar oogle ogle gle cholar holar olar lar"},
-  {t:"缂冩垹绮?/ Stack Overflow",p:"software/network.html",kw:"缂冩垹绮?stack overflow dns 娴狅絿鎮?缂堣顣?stack overflow tack ack verflow erflow rflow flow low"},
-  {t:"缂冩垹绮?/ Dev.to + Medium",p:"software/network.html",kw:"缂冩垹绮?dev.to + medium dns 娴狅絿鎮?缂堣顣?dev to medium edium dium ium"},
-  {t:"缂冩垹绮?/ edX / Coursera",p:"software/network.html",kw:"缂冩垹绮?edx / coursera dns 娴狅絿鎮?缂堣顣?edx coursera oursera ursera rsera sera era"},
-  {t:"缂冩垹绮?/ Hugging Face",p:"software/network.html",kw:"缂冩垹绮?hugging face dns 娴狅絿鎮?缂堣顣?hugging face ugging gging ging ing ace"},
-  {t:"Python / 瀵板牆顦块崢澶婎唺閻ㄥ嫬浼愰崗铚傜贩鐠ф牕鐣?,p:"software/python.html",kw:"python 瀵板牆顦块崢澶婎唺閻ㄥ嫬浼愰崗铚傜贩鐠ф牕鐣?python pip conda"},
-  {t:"Python / 娑撳娴囩€瑰顥婇崠?,p:"software/python.html",kw:"python 娑撳娴囩€瑰顥婇崠?python pip conda"},
-  {t:"Python / 鐟佸懎銈介崥搴ㄧ崣鐠?,p:"software/python.html",kw:"python 鐟佸懎銈介崥搴ㄧ崣鐠?python pip conda"},
-  {t:"Adobe / 閺嶇绺炬担婊呮暏",p:"software/adobe.html",kw:"adobe 閺嶇绺炬担婊呮暏"},
-  {t:"缂冩垵娼?/ 棣冩礈 閸ユ儳鎯傚銉ュ徔缁?閳?鐎规ɑ鏌熺純鎴犵彲",p:"software/links.html",kw:"缂冩垵娼?棣冩礈 閸ユ儳鎯傚銉ュ徔缁?閳?鐎规ɑ鏌熺純鎴犵彲 闁剧偓甯?缂冩垹鐝?},
-  {t:"缂冩垵娼?/ 棣冩惓 濞撳憡鍨欓崝鐘插 閳?濞撳憡鍨欑敮褎鏆熼惄鎴炲付娑撳簼绱崠?,p:"software/links.html",kw:"缂冩垵娼?棣冩惓 濞撳憡鍨欓崝鐘插 閳?濞撳憡鍨欑敮褎鏆熼惄鎴炲付娑撳簼绱崠?闁剧偓甯?缂冩垹鐝?},
-  {t:"缂冩垵娼?/ 棣冩灱 CPU-Z / GPU-Z 鐎规缍?,p:"software/links.html",kw:"缂冩垵娼?棣冩灱 cpu-z / gpu-z 鐎规缍?闁剧偓甯?缂冩垹鐝?cpu z gpu"},
-  {t:"缂冩垵娼?/ 棣冩惞 HWiNFO 閳?濞ｅ崬瀹崇涵顑挎閻╂垶濮?,p:"software/links.html",kw:"缂冩垵娼?棣冩惞 hwinfo 閳?濞ｅ崬瀹崇涵顑挎閻╂垶濮?闁剧偓甯?缂冩垹鐝?hwinfo winfo info nfo"},
-  {t:"缂冩垵娼?/ 棣冨箖 Steam 閳?閸忋劎鎮嗛張鈧径褎鐖堕幋蹇撻挬閸?,p:"software/links.html",kw:"缂冩垵娼?棣冨箖 steam 閳?閸忋劎鎮嗛張鈧径褎鐖堕幋蹇撻挬閸?闁剧偓甯?缂冩垹鐝?steam team eam"},
-  {t:"缂冩垵娼?/ 棣冪厷 Epic Games Store",p:"software/links.html",kw:"缂冩垵娼?棣冪厷 epic games store 闁剧偓甯?缂冩垹鐝?epic games store pic ames mes tore ore"},
-  {t:"缂冩垵娼?/ 棣冪厺 NVIDIA 妞瑰崬濮╂稉瀣祰",p:"software/links.html",kw:"缂冩垵娼?棣冪厺 nvidia 妞瑰崬濮╂稉瀣祰 闁剧偓甯?缂冩垹鐝?nvidia vidia idia dia"},
-  {t:"缂冩垵娼?/ 棣冩暩 AMD Adrenalin 閳?Radeon 鐎规ɑ鏌熸す鍗炲З",p:"software/links.html",kw:"缂冩垵娼?棣冩暩 amd adrenalin 閳?radeon 鐎规ɑ鏌熸す鍗炲З 闁剧偓甯?缂冩垹鐝?amd adrenalin radeon drenalin renalin enalin nalin alin lin adeon deon eon"},
-  {t:"缂冩垵娼?/ 棣冩暫 Intel 妞瑰崬濮╂稉搴㈡暜閹镐礁濮幍?,p:"software/links.html",kw:"缂冩垵娼?棣冩暫 intel 妞瑰崬濮╂稉搴㈡暜閹镐礁濮幍?闁剧偓甯?缂冩垹鐝?intel ntel tel"},
-  {t:"缂冩垵娼?/ BlueScreenView / WinDbg Preview",p:"software/links.html",kw:"缂冩垵娼?bluescreenview / windbg preview 闁剧偓甯?缂冩垹鐝?bluescreenview windbg preview luescreenview uescreenview escreenview screenview creenview reenview eenview enview nview view iew indbg ndbg dbg review eview"},
-  {t:"缂冩垵娼?/ Rufus 閳?缁绢垰鍣?U 閻╂ê鍩楁担婊冧紣閸?,p:"software/links.html",kw:"缂冩垵娼?rufus 閳?缁绢垰鍣?u 閻╂ê鍩楁担婊冧紣閸?闁剧偓甯?缂冩垹鐝?rufus u ufus fus"},
+  {t:"CPU / i3 — 入门 / 轻办公",p:"hardware/cpu.html",kw:"cpu i3 — 入门 / 轻办公 处理器 i3"},
+  {t:"CPU / i5 — 主流性能",p:"hardware/cpu.html",kw:"cpu i5 — 主流性能 处理器 i5"},
+  {t:"CPU / i7 — 高端多任务",p:"hardware/cpu.html",kw:"cpu i7 — 高端多任务 处理器 i7"},
+  {t:"CPU / i9 — 旗舰极限性能",p:"hardware/cpu.html",kw:"cpu i9 — 旗舰极限性能 处理器 i9"},
+  {t:"CPU / Core Ultra 5 / 7 / 9",p:"hardware/cpu.html",kw:"cpu core ultra 5 / 7 / 9 处理器 core ultra 5 7 9 ore ltra tra"},
+  {t:"CPU / Ryzen 3 — 入门",p:"hardware/cpu.html",kw:"cpu ryzen 3 — 入门 处理器 ryzen 3 yzen zen"},
+  {t:"CPU / Ryzen 5 — 主流甜点",p:"hardware/cpu.html",kw:"cpu ryzen 5 — 主流甜点 处理器 ryzen 5 yzen zen"},
+  {t:"CPU / Ryzen 7 — 高效多核",p:"hardware/cpu.html",kw:"cpu ryzen 7 — 高效多核 处理器 ryzen 7 yzen zen"},
+  {t:"CPU / Ryzen 9 — 桌面旗舰",p:"hardware/cpu.html",kw:"cpu ryzen 9 — 桌面旗舰 处理器 ryzen 9 yzen zen"},
+  {t:"GPU / XX50 级 — 入门卡",p:"hardware/gpu.html",kw:"gpu xx50 级 — 入门卡 显卡 图形卡 xx50 x50"},
+  {t:"GPU / XX60 级 — 甜点级（装机最大体量）",p:"hardware/gpu.html",kw:"gpu xx60 级 — 甜点级（装机最大体量） 显卡 图形卡 xx60 x60"},
+  {t:"GPU / XX70 级 — 高端起步",p:"hardware/gpu.html",kw:"gpu xx70 级 — 高端起步 显卡 图形卡 xx70 x70"},
+  {t:"GPU / XX80 级 — 次旗舰",p:"hardware/gpu.html",kw:"gpu xx80 级 — 次旗舰 显卡 图形卡 xx80 x80"},
+  {t:"GPU / XX90 级 — 卡皇",p:"hardware/gpu.html",kw:"gpu xx90 级 — 卡皇 显卡 图形卡 xx90 x90"},
+  {t:"GPU / 30 系 (Ampere)→40 系 (Ada Lovelace)→50 系 (Blackwell, 2025+)",p:"hardware/gpu.html",kw:"gpu 30 系 (ampere)→40 系 (ada lovelace)→50 系 (blackwell, 2025+) 显卡 图形卡 30 ampere 40 ada lovelace 50 blackwell 2025 mpere pere ere ovelace velace elace lace ace lackwell ackwell ckwell kwell well ell 025"},
+  {t:"GPU / RX X600 级→X700(甜点)→X800(次旗舰)→X900(旗舰)",p:"hardware/gpu.html",kw:"gpu rx x600 级→x700(甜点)→x800(次旗舰)→x900(旗舰) 显卡 图形卡 rx x600 x700 x800 x900 600 700 800 900"},
+  {t:"GPU / Arc A300 / A500 / A700 → Battlemage (B 系列)",p:"hardware/gpu.html",kw:"gpu arc a300 / a500 / a700 → battlemage (b 系列) 显卡 图形卡 arc a300 a500 a700 battlemage b 300 500 700 attlemage ttlemage tlemage lemage emage mage age"},
+  {t:"GPU / 🏷 一线大厂（工程积累深厚）",p:"hardware/gpu.html",kw:"gpu 🏷 一线大厂（工程积累深厚） 显卡 图形卡"},
+  {t:"GPU / 🏷 中国主要品牌",p:"hardware/gpu.html",kw:"gpu 🏷 中国主要品牌 显卡 图形卡"},
+  {t:"GPU / 🏷 其他精选品牌",p:"hardware/gpu.html",kw:"gpu 🏷 其他精选品牌 显卡 图形卡"},
+  {t:"GPU / 带宽公式",p:"hardware/gpu.html",kw:"gpu 带宽公式 显卡 图形卡"},
+  {t:"GPU / 推荐大小",p:"hardware/gpu.html",kw:"gpu 推荐大小 显卡 图形卡"},
+  {t:"主板 / H610 — 入门级",p:"hardware/motherboard.html",kw:"主板 h610 — 入门级 主板与机箱 h610 610"},
+  {t:"主板 / B760 — 主流",p:"hardware/motherboard.html",kw:"主板 b760 — 主流 主板与机箱 b760 760"},
+  {t:"主板 / Z790 — 旗舰",p:"hardware/motherboard.html",kw:"主板 z790 — 旗舰 主板与机箱 z790 790"},
+  {t:"主板 / A620 — 入门 (AM5)",p:"hardware/motherboard.html",kw:"主板 a620 — 入门 (am5) 主板与机箱 a620 am5 620"},
+  {t:"主板 / B650 / B650E — 主流",p:"hardware/motherboard.html",kw:"主板 b650 / b650e — 主流 主板与机箱 b650 b650e 650 650e 50e"},
+  {t:"主板 / X670 / X670E — 旗舰",p:"hardware/motherboard.html",kw:"主板 x670 / x670e — 旗舰 主板与机箱 x670 x670e 670 670e 70e"},
+  {t:"主板 / 📡 带 WiFi 版本",p:"hardware/motherboard.html",kw:"主板 📡 带 wifi 版本 主板与机箱 wifi ifi"},
+  {t:"主板 / 🔌 不带 WiFi 版本",p:"hardware/motherboard.html",kw:"主板 🔌 不带 wifi 版本 主板与机箱 wifi ifi"},
+  {t:"主板 / Mini-ITX（170mm × 170mm）",p:"hardware/motherboard.html",kw:"主板 mini-itx（170mm × 170mm） 主板与机箱 mini itx 170mm ini 70mm 0mm"},
+  {t:"主板 / Micro-ATX（244mm × 244mm）",p:"hardware/motherboard.html",kw:"主板 micro-atx（244mm × 244mm） 主板与机箱 micro atx 244mm icro cro 44mm 4mm"},
+  {t:"主板 / Standard ATX（305mm × 244mm）",p:"hardware/motherboard.html",kw:"主板 standard atx（305mm × 244mm） 主板与机箱 standard atx 305mm 244mm tandard andard ndard dard ard 05mm 5mm 44mm 4mm"},
+  {t:"主板 / Extended-ATX（305mm × 277mm+）",p:"hardware/motherboard.html",kw:"主板 extended-atx（305mm × 277mm+） 主板与机箱 extended atx 305mm 277mm xtended tended ended nded ded 05mm 5mm 77mm 7mm"},
+  {t:"主板 / ITX 机箱",p:"hardware/motherboard.html",kw:"主板 itx 机箱 主板与机箱 itx"},
+  {t:"主板 / M-ATX 机箱",p:"hardware/motherboard.html",kw:"主板 m-atx 机箱 主板与机箱 m atx"},
+  {t:"主板 / ATX 中塔",p:"hardware/motherboard.html",kw:"主板 atx 中塔 主板与机箱 atx"},
+  {t:"主板 / E-ATX 全塔",p:"hardware/motherboard.html",kw:"主板 e-atx 全塔 主板与机箱 e atx"},
+  {t:"内存 / 适用场景",p:"hardware/ram.html",kw:"内存 适用场景 ram"},
+  {t:"内存 / 双通道 vs 四通道",p:"hardware/ram.html",kw:"内存 双通道 vs 四通道 ram vs"},
+  {t:"硬盘 / SATA SSD",p:"hardware/storage.html",kw:"硬盘 sata ssd ssd hdd 磁盘 sata ssd ata"},
+  {t:"硬盘 / M.2 NVMe SSD",p:"hardware/storage.html",kw:"硬盘 m.2 nvme ssd ssd hdd 磁盘 m 2 nvme ssd vme"},
+  {t:"硬盘 / 大容量归档",p:"hardware/storage.html",kw:"硬盘 大容量归档 ssd hdd 磁盘"},
+  {t:"硬盘 / CMR vs SMR",p:"hardware/storage.html",kw:"硬盘 cmr vs smr ssd hdd 磁盘 cmr vs smr"},
+  {t:"电源 / 450W - 550W",p:"hardware/psu.html",kw:"电源 450w - 550w 450w 550w 50w"},
+  {t:"电源 / 650W - 750W",p:"hardware/psu.html",kw:"电源 650w - 750w 650w 750w 50w"},
+  {t:"电源 / 850W - 1200W",p:"hardware/psu.html",kw:"电源 850w - 1200w 850w 1200w 50w 200w 00w"},
+  {t:"电源 / 🇯🇵 日本电容（日系电容）",p:"hardware/psu.html",kw:"电源 🇯🇵 日本电容（日系电容）"},
+  {t:"电源 / 🇹🇼 台湾电容",p:"hardware/psu.html",kw:"电源 🇹🇼 台湾电容"},
+  {t:"电源 / 🇨🇳 大陆电容",p:"hardware/psu.html",kw:"电源 🇨🇳 大陆电容"},
+  {t:"散热 / 风冷散热",p:"hardware/cooling.html",kw:"散热 风冷散热 风扇 水冷"},
+  {t:"散热 / 水冷散热",p:"hardware/cooling.html",kw:"散热 水冷散热 风扇 水冷"},
+  {t:"散热 / 被动散热",p:"hardware/cooling.html",kw:"散热 被动散热 风扇 水冷"},
+  {t:"散热 / 前吸后排",p:"hardware/cooling.html",kw:"散热 前吸后排 风扇 水冷"},
+  {t:"散热 / 正压 vs 负压",p:"hardware/cooling.html",kw:"散热 正压 vs 负压 风扇 水冷 vs"},
+  {t:"外设 / DPI (每英寸点数)",p:"hardware/peripherals.html",kw:"外设 dpi (每英寸点数) 键盘 鼠标 显示器 dpi"},
+  {t:"外设 / 回报率 (Polling Rate)",p:"hardware/peripherals.html",kw:"外设 回报率 (polling rate) 键盘 鼠标 显示器 polling rate olling lling ling ing ate"},
+  {t:"外设 / 📏 尺寸速查（常见参照物体）",p:"hardware/peripherals.html",kw:"外设 📏 尺寸速查（常见参照物体） 键盘 鼠标 显示器"},
+  {t:"外设 / 🎨 色域详解",p:"hardware/peripherals.html",kw:"外设 🎨 色域详解 键盘 鼠标 显示器"},
+  {t:"外设 / sRGB",p:"hardware/peripherals.html",kw:"外设 srgb 键盘 鼠标 显示器 rgb"},
+  {t:"外设 / DCI-P3（电影级色域）",p:"hardware/peripherals.html",kw:"外设 dci-p3（电影级色域） 键盘 鼠标 显示器 dci p3"},
+  {t:"外设 / Adobe RGB",p:"hardware/peripherals.html",kw:"外设 adobe rgb 键盘 鼠标 显示器 adobe rgb dobe obe"},
+  {t:"外设 / 📌 选显示器要看的七个参数",p:"hardware/peripherals.html",kw:"外设 📌 选显示器要看的七个参数 键盘 鼠标 显示器"},
+  {t:"系统错误 / 0x0000007B — INACCESSIBLE_BOOT_DEVICE",p:"system/errors.html",kw:"系统错误 0x0000007b — inaccessible_boot_device 蓝屏 bsod bugcheck bug 0x0000007b inaccessible boot device x0000007b 0000007b 000007b 00007b 0007b 007b 07b naccessible accessible ccessible cessible essible ssible sible ible ble oot evice vice ice"},
+  {t:"系统错误 / 0x000000EA — THREAD_STUCK_IN_DEVICE_DRIVER",p:"system/errors.html",kw:"系统错误 0x000000ea — thread_stuck_in_device_driver 蓝屏 bsod bugcheck bug 0x000000ea thread stuck in device driver x000000ea 000000ea 00000ea 0000ea 000ea 00ea 0ea hread read ead tuck uck evice vice ice river iver ver"},
+  {t:"系统错误 / 0x00000050 — PAGE_FAULT_IN_NONPAGED_AREA",p:"system/errors.html",kw:"系统错误 0x00000050 — page_fault_in_nonpaged_area 蓝屏 bsod bugcheck bug 0x00000050 page fault in nonpaged area x00000050 00000050 0000050 000050 00050 0050 050 age ault ult onpaged npaged paged aged ged rea"},
+  {t:"系统错误 / 0x0000001A — MEMORY_MANAGEMENT",p:"system/errors.html",kw:"系统错误 0x0000001a — memory_management 蓝屏 bsod bugcheck bug 0x0000001a memory management x0000001a 0000001a 000001a 00001a 0001a 001a 01a emory mory ory anagement nagement agement gement ement ment ent"},
+  {t:"系统错误 / 0x000000D1 — DRIVER_IRQL_NOT_LESS_OR_EQUAL",p:"system/errors.html",kw:"系统错误 0x000000d1 — driver_irql_not_less_or_equal 蓝屏 bsod bugcheck bug 0x000000d1 driver irql not less or equal x000000d1 000000d1 00000d1 0000d1 000d1 00d1 0d1 river iver ver rql ess qual ual"},
+  {t:"系统错误 / 0x0000003B — SYSTEM_SERVICE_EXCEPTION",p:"system/errors.html",kw:"系统错误 0x0000003b — system_service_exception 蓝屏 bsod bugcheck bug 0x0000003b system service exception x0000003b 0000003b 000003b 00003b 0003b 003b 03b ystem stem tem ervice rvice vice ice xception ception eption ption tion ion"},
+  {t:"系统错误 / 0x0000009F — DRIVER_POWER_STATE_FAILURE",p:"system/errors.html",kw:"系统错误 0x0000009f — driver_power_state_failure 蓝屏 bsod bugcheck bug 0x0000009f driver power state failure x0000009f 0000009f 000009f 00009f 0009f 009f 09f river iver ver ower wer tate ate ailure ilure lure ure"},
+  {t:"系统错误 / 0x00000124 — WHEA_UNCORRECTABLE_ERROR",p:"system/errors.html",kw:"系统错误 0x00000124 — whea_uncorrectable_error 蓝屏 bsod bugcheck bug 0x00000124 whea uncorrectable error x00000124 00000124 0000124 000124 00124 0124 124 hea ncorrectable correctable orrectable rrectable rectable ectable ctable table able ble rror ror"},
+  {t:"系统错误 / 0x00000D1 — IRQL Drive...重复→算旧版本含其他关联。",p:"system/errors.html",kw:"系统错误 0x00000d1 — irql drive...重复→算旧版本含其他关联。 蓝屏 bsod bugcheck bug 0x00000d1 irql drive x00000d1 00000d1 0000d1 000d1 00d1 0d1 rql rive ive"},
+  {t:"系统错误 / 0xC000021A — STATUS_SYSTEM_PROCESS_TERMINATED",p:"system/errors.html",kw:"系统错误 0xc000021a — status_system_process_terminated 蓝屏 bsod bugcheck bug 0xc000021a status system process terminated xc000021a c000021a 000021a 00021a 0021a 021a 21a tatus atus tus ystem stem tem rocess ocess cess ess erminated rminated minated inated nated ated ted"},
+  {t:"系统错误 / CRITICAL_PROCESS_DIED",p:"system/errors.html",kw:"系统错误 critical_process_died 蓝屏 bsod bugcheck bug critical process died ritical itical tical ical cal rocess ocess cess ess ied"},
+  {t:"系统错误 / KERNEL_SECURITY_CHECK_FAILURE",p:"system/errors.html",kw:"系统错误 kernel_security_check_failure 蓝屏 bsod bugcheck bug kernel security check failure ernel rnel nel ecurity curity urity rity ity heck eck ailure ilure lure ure"},
+  {t:"系统错误 / 无法启动此程序，因为计算机中丢失 xxx.dll",p:"system/errors.html",kw:"系统错误 无法启动此程序，因为计算机中丢失 xxx.dll 蓝屏 bsod bugcheck bug xxx dll"},
+  {t:"系统错误 / 错误 0x80070002 / 0x80070003 — 找不到文件",p:"system/errors.html",kw:"系统错误 错误 0x80070002 / 0x80070003 — 找不到文件 蓝屏 bsod bugcheck bug 0x80070002 0x80070003 x80070002 80070002 0070002 070002 70002 0002 002 x80070003 80070003 0070003 070003 70003 0003 003"},
+  {t:"系统错误 / 0xc0000225 — 找不到启动设备",p:"system/errors.html",kw:"系统错误 0xc0000225 — 找不到启动设备 蓝屏 bsod bugcheck bug 0xc0000225 xc0000225 c0000225 0000225 000225 00225 0225 225"},
+  {t:"系统错误 / 0xc000000F — Windows 启动管理器错误",p:"system/errors.html",kw:"系统错误 0xc000000f — windows 启动管理器错误 蓝屏 bsod bugcheck bug 0xc000000f windows xc000000f c000000f 000000f 00000f 0000f 000f 00f indows ndows dows ows"},
+  {t:"系统错误 / 0x80004005 — 未指明的通用错误",p:"system/errors.html",kw:"系统错误 0x80004005 — 未指明的通用错误 蓝屏 bsod bugcheck bug 0x80004005 x80004005 80004005 0004005 004005 04005 4005 005"},
+  {t:"系统错误 / DNS 服务器未响应",p:"system/errors.html",kw:"系统错误 dns 服务器未响应 蓝屏 bsod bugcheck bug dns"},
+  {t:"系统错误 / ERR_CONNECTION_RESET / 连接已重置",p:"system/errors.html",kw:"系统错误 err_connection_reset / 连接已重置 蓝屏 bsod bugcheck bug err connection reset onnection nnection nection ection ction tion ion eset set"},
+  {t:"系统错误 / ERR_NAME_NOT_RESOLVED / 无法解析服务器地址",p:"system/errors.html",kw:"系统错误 err_name_not_resolved / 无法解析服务器地址 蓝屏 bsod bugcheck bug err name not resolved ame esolved solved olved lved ved"},
+  {t:"系统错误 / 0x800CCC0F — 邮件端口出站被挡",p:"system/errors.html",kw:"系统错误 0x800ccc0f — 邮件端口出站被挡 蓝屏 bsod bugcheck bug 0x800ccc0f x800ccc0f 800ccc0f 00ccc0f 0ccc0f ccc0f cc0f c0f"},
+  {t:"系统错误 / 0x80070020 — 程序正在使用",p:"system/errors.html",kw:"系统错误 0x80070020 — 程序正在使用 蓝屏 bsod bugcheck bug 0x80070020 x80070020 80070020 0070020 070020 70020 0020 020"},
+  {t:"系统错误 / 0x80072EE2  / 0x80072F8F — 时间与服务器不同步",p:"system/errors.html",kw:"系统错误 0x80072ee2  / 0x80072f8f — 时间与服务器不同步 蓝屏 bsod bugcheck bug 0x80072ee2 0x80072f8f x80072ee2 80072ee2 0072ee2 072ee2 72ee2 2ee2 ee2 x80072f8f 80072f8f 0072f8f 072f8f 72f8f 2f8f f8f"},
+  {t:"系统错误 / 0x800F0922 — 太小的系统保留分区",p:"system/errors.html",kw:"系统错误 0x800f0922 — 太小的系统保留分区 蓝屏 bsod bugcheck bug 0x800f0922 x800f0922 800f0922 00f0922 0f0922 f0922 0922 922"},
+  {t:"系统错误 / 0x8024200B — 更新下载损坏",p:"system/errors.html",kw:"系统错误 0x8024200b — 更新下载损坏 蓝屏 bsod bugcheck bug 0x8024200b x8024200b 8024200b 024200b 24200b 4200b 200b 00b"},
+  {t:"系统错误 / 0x800703EE (文件污染)",p:"system/errors.html",kw:"系统错误 0x800703ee (文件污染) 蓝屏 bsod bugcheck bug 0x800703ee x800703ee 800703ee 00703ee 0703ee 703ee 03ee 3ee"},
+  {t:"系统错误 / 0x8007001F — 设备未运行完全",p:"system/errors.html",kw:"系统错误 0x8007001f — 设备未运行完全 蓝屏 bsod bugcheck bug 0x8007001f x8007001f 8007001f 007001f 07001f 7001f 001f 01f"},
+  {t:"Windows / 用户界面与交互变化",p:"system/win1011.html",kw:"windows 用户界面与交互变化 win windows win"},
+  {t:"Windows / 硬件与底层架构差异",p:"system/win1011.html",kw:"windows 硬件与底层架构差异 win windows win"},
+  {t:"Windows / 性能与兼容性",p:"system/win1011.html",kw:"windows 性能与兼容性 win windows win"},
+  {t:"Windows / 升级建议",p:"system/win1011.html",kw:"windows 升级建议 win windows win"},
+  {t:"Windows / UEFI 安全策略",p:"system/win1011.html",kw:"windows uefi 安全策略 win windows win uefi efi"},
+  {t:"Windows / 注意事项",p:"system/win1011.html",kw:"windows 注意事项 win windows win"},
+  {t:"Linux/macOS / Linux 发行版定位与选择",p:"system/linux-mac.html",kw:"linux/macos linux 发行版定位与选择 linux ubuntu macos mac os linux inux nux"},
+  {t:"Linux/macOS / 终端常用姿势",p:"system/linux-mac.html",kw:"linux/macos 终端常用姿势 linux ubuntu macos mac os"},
+  {t:"Linux/macOS / WSL2——在 Windows 中运行真实 Linux 内核",p:"system/linux-mac.html",kw:"linux/macos wsl2——在 windows 中运行真实 linux 内核 linux ubuntu macos mac os wsl2 windows linux sl2 indows ndows dows ows inux nux"},
+  {t:"Linux/macOS / macOS 系统",p:"system/linux-mac.html",kw:"linux/macos macos 系统 linux ubuntu macos mac os macos acos cos"},
+  {t:"Linux/macOS / 跨平台差异化",p:"system/linux-mac.html",kw:"linux/macos 跨平台差异化 linux ubuntu macos mac os"},
+  {t:"激活 / 什么是数字许可证",p:"system/activation.html",kw:"激活 什么是数字许可证"},
+  {t:"激活 / 操作步骤",p:"system/activation.html",kw:"激活 操作步骤"},
+  {t:"激活 / KMS 是什么",p:"system/activation.html",kw:"激活 kms 是什么 kms"},
+  {t:"激活 / 常用 slmgr 命令",p:"system/activation.html",kw:"激活 常用 slmgr 命令 slmgr lmgr mgr"},
+  {t:"下载 / ISO 镜像下载页",p:"system/download.html",kw:"下载 iso 镜像下载页 iso"},
+  {t:"下载 / 官方工具集",p:"system/download.html",kw:"下载 官方工具集"},
+  {t:"下载 / 激活与许可证",p:"system/download.html",kw:"下载 激活与许可证"},
+  {t:"AI Agent / 核心区别：AI 聊天 vs AI Agent",p:"software/ai-agent.html",kw:"ai agent 核心区别：ai 聊天 vs ai agent ai vs agent gent ent"},
+  {t:"AI Agent / 💻 OpenAI Codex CLI",p:"software/ai-agent.html",kw:"ai agent 💻 openai codex cli openai codex cli penai enai nai odex dex"},
+  {t:"AI Agent / ☁️ Claude Code",p:"software/ai-agent.html",kw:"ai agent ☁️ claude code claude code laude aude ude ode"},
+  {t:"AI Agent / 🤖 其他重要 Agent 工具",p:"software/ai-agent.html",kw:"ai agent 🤖 其他重要 agent 工具 agent gent ent"},
+  {t:"AI Agent / 🔑 API Key = 你的数字身份证",p:"software/ai-agent.html",kw:"ai agent 🔑 api key = 你的数字身份证 api key"},
+  {t:"AI Agent / 📋 从哪能免费拿到 API Key？",p:"software/ai-agent.html",kw:"ai agent 📋 从哪能免费拿到 api key？ api key"},
+  {t:"AI Agent / 📜 Rule（规则）= 你给 Agent 写的法律规定",p:"software/ai-agent.html",kw:"ai agent 📜 rule（规则）= 你给 agent 写的法律规定 rule agent ule gent ent"},
+  {t:"AI Agent / 另一种 Rule：定期自动执行",p:"software/ai-agent.html",kw:"ai agent 另一种 rule：定期自动执行 rule ule"},
+  {t:"AI Agent / 🎯 Skill = 一套专属的说明书",p:"software/ai-agent.html",kw:"ai agent 🎯 skill = 一套专属的说明书 skill kill ill"},
+  {t:"AI Agent / 实际例子",p:"software/ai-agent.html",kw:"ai agent 实际例子"},
+  {t:"AI Agent / Token 是什么",p:"software/ai-agent.html",kw:"ai agent token 是什么 token oken ken"},
+  {t:"AI Agent / RAG — 给 AI 更有实料的知识",p:"software/ai-agent.html",kw:"ai agent rag — 给 ai 更有实料的知识 rag ai"},
+  {t:"GitHub / Star（收藏）",p:"software/github.html",kw:"github star（收藏） 开源 git star tar"},
+  {t:"GitHub / Fork（叉一叉）",p:"software/github.html",kw:"github fork（叉一叉） 开源 git fork ork"},
+  {t:"GitHub / Pull Request (PR)",p:"software/github.html",kw:"github pull request (pr) 开源 git pull request pr ull equest quest uest est"},
+  {t:"GitHub / Issues",p:"software/github.html",kw:"github issues 开源 git ssues sues ues"},
+  {t:"GitHub / 🎵 GenP — Adobe 激活补丁",p:"software/github.html",kw:"github 🎵 genp — adobe 激活补丁 开源 git genp adobe enp dobe obe"},
+  {t:"GitHub / 🧠 LM Studio — 图形化本地大模型管家",p:"software/github.html",kw:"github 🧠 lm studio — 图形化本地大模型管家 开源 git lm studio tudio udio dio"},
+  {t:"GitHub / 🎨 Stable Diffusion WebUI — 本地 AI 画图（浏览器版）",p:"software/github.html",kw:"github 🎨 stable diffusion webui — 本地 ai 画图（浏览器版） 开源 git stable diffusion webui ai table able ble iffusion ffusion fusion usion sion ion ebui bui"},
+  {t:"GitHub / 🔮 ComfyUI — 节点式 AI 作图工作流",p:"software/github.html",kw:"github 🔮 comfyui — 节点式 ai 作图工作流 开源 git comfyui ai omfyui mfyui fyui yui"},
+  {t:"GitHub / 🛠 图吧工具箱 — 电脑硬件检测合集",p:"software/github.html",kw:"github 🛠 图吧工具箱 — 电脑硬件检测合集 开源 git"},
+  {t:"GitHub / 🧩 ImHex — 十六进制文件编辑器",p:"software/github.html",kw:"github 🧩 imhex — 十六进制文件编辑器 开源 git imhex mhex hex"},
+  {t:"GitHub / 🔊 OBS Studio — 免费直播/录屏/推流",p:"software/github.html",kw:"github 🔊 obs studio — 免费直播/录屏/推流 开源 git obs studio tudio udio dio"},
+  {t:"GitHub / 📁 EverythingToolbar — 秒级全盘文件搜索",p:"software/github.html",kw:"github 📁 everythingtoolbar — 秒级全盘文件搜索 开源 git everythingtoolbar verythingtoolbar erythingtoolbar rythingtoolbar ythingtoolbar thingtoolbar hingtoolbar ingtoolbar ngtoolbar gtoolbar toolbar oolbar olbar lbar bar"},
+  {t:"GitHub / 🌲 PowerToys — 微软官方增强套件",p:"software/github.html",kw:"github 🌲 powertoys — 微软官方增强套件 开源 git powertoys owertoys wertoys ertoys rtoys toys oys"},
+  {t:"安全 / 火绒安全软件",p:"software/security.html",kw:"安全 火绒安全软件 病毒 防火墙 杀毒"},
+  {t:"安全 / 360 安全卫士",p:"software/security.html",kw:"安全 360 安全卫士 病毒 防火墙 杀毒 360"},
+  {t:"安全 / 🦊 银狐病毒 (Silver Fox)",p:"software/security.html",kw:"安全 🦊 银狐病毒 (silver fox) 病毒 防火墙 杀毒 silver fox ilver lver ver"},
+  {t:"安全 / 🐴 木马病毒 (Trojan)",p:"software/security.html",kw:"安全 🐴 木马病毒 (trojan) 病毒 防火墙 杀毒 trojan rojan ojan jan"},
+  {t:"安全 / ⛏ 挖矿病毒 / CryptoJacking",p:"software/security.html",kw:"安全 ⛏ 挖矿病毒 / cryptojacking 病毒 防火墙 杀毒 cryptojacking ryptojacking yptojacking ptojacking tojacking ojacking jacking acking cking king ing"},
+  {t:"安全 / 🔒 勒索病毒 (Ransomware)",p:"software/security.html",kw:"安全 🔒 勒索病毒 (ransomware) 病毒 防火墙 杀毒 ransomware ansomware nsomware somware omware mware ware are"},
+  {t:"安全 / 📢 流氓软件 / 广告弹窗",p:"software/security.html",kw:"安全 📢 流氓软件 / 广告弹窗 病毒 防火墙 杀毒"},
+  {t:"网络 / 国内镜像站",p:"software/network.html",kw:"网络 国内镜像站 dns 代理 翻墙"},
+  {t:"网络 / Gitee 国内同步",p:"software/network.html",kw:"网络 gitee 国内同步 dns 代理 翻墙 gitee itee tee"},
+  {t:"网络 / arXiv · 论文识别",p:"software/network.html",kw:"网络 arxiv · 论文识别 dns 代理 翻墙 arxiv rxiv xiv"},
+  {t:"网络 / 谷歌学术 / Google Scholar",p:"software/network.html",kw:"网络 谷歌学术 / google scholar dns 代理 翻墙 google scholar oogle ogle gle cholar holar olar lar"},
+  {t:"网络 / Stack Overflow",p:"software/network.html",kw:"网络 stack overflow dns 代理 翻墙 stack overflow tack ack verflow erflow rflow flow low"},
+  {t:"网络 / Dev.to + Medium",p:"software/network.html",kw:"网络 dev.to + medium dns 代理 翻墙 dev to medium edium dium ium"},
+  {t:"网络 / edX / Coursera",p:"software/network.html",kw:"网络 edx / coursera dns 代理 翻墙 edx coursera oursera ursera rsera sera era"},
+  {t:"网络 / Hugging Face",p:"software/network.html",kw:"网络 hugging face dns 代理 翻墙 hugging face ugging gging ging ing ace"},
+  {t:"Python / 依赖 —— 装工具绕不开的地基",p:"software/python.html",kw:"python 依赖 地基 python pip conda stable diffusion comfyui obs"},
+  {t:"Python / 安装与 PATH 勾选",p:"software/python.html",kw:"python 安装 path 勾选 python pip conda"},
+  {t:"Python / pip 与清华换源",p:"software/python.html",kw:"python pip 换源 清华 pypi python conda"},
+  {t:"GenP / Adobe 套件开源补丁",p:"software/adobe.html",kw:"genp adobe 补丁 创意套件 ps pr ae"},
+  {t:"网址 / 🛠 图吧工具箱 — 官方网站",p:"software/links.html",kw:"网址 🛠 图吧工具箱 — 官方网站 链接 网站"},
+  {t:"网址 / 📊 游戏加加 — 游戏帧数监控与优化",p:"software/links.html",kw:"网址 📊 游戏加加 — 游戏帧数监控与优化 链接 网站"},
+  {t:"网址 / 🖥 CPU-Z / GPU-Z 官网",p:"software/links.html",kw:"网址 🖥 cpu-z / gpu-z 官网 链接 网站 cpu z gpu"},
+  {t:"网址 / 📏 HWiNFO — 深度硬件监护",p:"software/links.html",kw:"网址 📏 hwinfo — 深度硬件监护 链接 网站 hwinfo winfo info nfo"},
+  {t:"网址 / 🎮 Steam — 全球最大游戏平台",p:"software/links.html",kw:"网址 🎮 steam — 全球最大游戏平台 链接 网站 steam team eam"},
+  {t:"网址 / 🟠 Epic Games Store",p:"software/links.html",kw:"网址 🟠 epic games store 链接 网站 epic games store pic ames mes tore ore"},
+  {t:"网址 / 🟢 NVIDIA 驱动下载",p:"software/links.html",kw:"网址 🟢 nvidia 驱动下载 链接 网站 nvidia vidia idia dia"},
+  {t:"网址 / 🔵 AMD Adrenalin — Radeon 官方驱动",p:"software/links.html",kw:"网址 🔵 amd adrenalin — radeon 官方驱动 链接 网站 amd adrenalin radeon drenalin renalin enalin nalin alin lin adeon deon eon"},
+  {t:"网址 / 🔷 Intel 驱动与支持助手",p:"software/links.html",kw:"网址 🔷 intel 驱动与支持助手 链接 网站 intel ntel tel"},
+  {t:"网址 / BlueScreenView / WinDbg Preview",p:"software/links.html",kw:"网址 bluescreenview / windbg preview 链接 网站 bluescreenview windbg preview luescreenview uescreenview escreenview screenview creenview reenview eenview enview nview view iew indbg ndbg dbg review eview"},
+  {t:"网址 / Rufus — 纯净 U 盘制作工具",p:"software/links.html",kw:"网址 rufus — 纯净 u 盘制作工具 链接 网站 rufus u ufus fus"},
 ];
 
 String.prototype.has = function(s) { return this.toLowerCase().indexOf(s.toLowerCase()) >= 0; };
@@ -444,9 +445,10 @@ async function renderC() {
       var tagText = p.tag || "\u672a\u5206\u7c7b";
       var bodyText = (p.body || "").slice(0, 80);
       var pid = p.id;
-      html += '<div class="note" style="left:' + x + '%;top:' + y + '%;transform:rotate(' + rot + 'deg);animation-delay:' + del + 's;border-left:4px solid ' + c + ';" onclick="openReply(\'' + pid + '\')"><div class="del-btn" onclick="event.stopPropagation();deletePost(\'' + pid + '\')">x</div><div class="note-tag" style="color:' + c + '">#' + tagText + '</div><div class="body">' + bodyText + '</div><div class="time">' + dateStr + (rc > 0 ? " \u00b7 " + rc + " 閸ョ偛顦? : "") + "</div></div>";
+      var own = (p.uid && p.uid === myUid) || !!myAdminKey;
+      html += '<div class="note" style="left:' + x + '%;top:' + y + '%;transform:rotate(' + rot + 'deg);animation-delay:' + del + 's;border-left:4px solid ' + c + ';" onclick="openReply(\'' + pid + '\')">' + (own ? '<div class="del-btn" onclick="event.stopPropagation();deletePost(\'' + pid + '\')">x</div>' : '') + '<div class="note-tag" style="color:' + c + '">#' + tagText + '</div><div class="body">' + bodyText + '</div><div class="time">' + (p.author || "\u533f\u540d") + " \u00b7 " + dateStr + (rc > 0 ? " \u00b7 " + rc + " \u56de\u590d" : "") + "</div></div>";
     } else {
-      html += '<div class="note empty-note" style="left:' + x + '%;top:' + y + '%;transform:rotate(' + rot + 'deg);animation-delay:' + del + 's;border-left:4px solid ' + c + ';">\u0154\u0165\u015d\u016a\u0157\u015e...</div>';
+      html += '<div class="note empty-note" style="left:' + x + '%;top:' + y + '%;transform:rotate(' + rot + 'deg);animation-delay:' + del + 's;border-left:4px solid ' + c + ';">\u7b49\u4f60\u6765\u53d1\u7b2c\u4e00\u5e16...</div>';
     }
   }
   stg.innerHTML = html;
@@ -458,6 +460,7 @@ function showAllTags() { currentTag = null; renderC(); }
 // ---- Post ----
 function communityPostOpen() {
   document.getElementById("postModal").classList.add("open");
+  renderTurnstile();
 }
 
 function communityPostClose() {
@@ -467,26 +470,28 @@ function communityPostClose() {
 }
 
 async function communityPost() {
-  if (!isLoggedIn()) { alert("鐠囧嘲鍘涢惂璇茬秿閸愬秴褰傜敮?); return; }
   var body = document.getElementById("postBody").value.trim();
   var tag = document.getElementById("postTag").value.trim() || "\u672a\u5206\u7c7b";
-  if (!body) return alert("閸愬懎顔愭稉宥堝厴娑撹櫣鈹?);
+  if (!body) return alert("\u5185\u5bb9\u4e0d\u80fd\u4e3a\u7a7a");
 
   var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   try {
-    await apiPost("/api/posts", { id: id, tag: tag, body: body, replies: [] });
+    await apiPost("/api/posts", { id: id, tag: tag, body: body, nickname: getNick(), turnstile: getTurnstileToken("post"), replies: [] });
     communityPostClose();
+    resetTurnstile("post");
     currentTag = null;
     renderC();
-  } catch(e) { alert("閸欐垵绔锋径杈Е: " + e.message); }
+  } catch(e) { alert("\u53d1\u5e03\u5931\u8d25: " + e.message); }
 }
 
 async function deletePost(id) {
-  if (!confirm("绾喛顓婚崚鐘绘珟鏉╂瑦娼拋銊啈閿?)) return;
+  if (!confirm("\u786e\u8ba4\u5220\u9664\u8fd9\u6761\u8ba8\u8bba\uff1f")) return;
   try {
-    await apiDelete("/api/posts/" + id);
+    var headers = {};
+    if (myAdminKey) headers["X-Admin-Key"] = myAdminKey;
+    await api("/api/posts/" + id, { method: "DELETE", headers: headers });
     renderC();
-  } catch(e) { alert("閸掔娀娅庢径杈Е: " + e.message); }
+  } catch(e) { alert("\u5220\u9664\u5931\u8d25: " + e.message); }
 }
 
 // ---- Reply ----
@@ -506,30 +511,31 @@ async function openReply(postId) {
   var replies = post.replies || [];
   var rh = "";
   for (var j = 0; j < replies.length; j++) {
-    rh += '<div class="reply-item"><span class="reply-ts">' + replies[j].ts + '</span><span class="reply-text">' + replies[j].body + '</span></div>';
+    rh += '<div class="reply-item"><span class="reply-ts">' + replies[j].ts + " \u00b7 " + (replies[j].nick || "\u533f\u540d") + '</span><span class="reply-text">' + replies[j].body + '</span></div>';
   }
-  document.getElementById("replyList").innerHTML = rh || '<div class="reply-empty">閺嗗倹妫ら崶鐐差槻閿涘本娼甸崘娆戭儑娑撯偓閺?/div>';
+  document.getElementById("replyList").innerHTML = rh || '<div class="reply-empty">\u6682\u65e0\u56de\u590d\uff0c\u6765\u5199\u7b2c\u4e00\u6761</div>';
   document.getElementById("replyModal").classList.add("open");
+  renderTurnstile();
 }
 
 async function replyPost() {
-  if (!isLoggedIn()) { alert("鐠囧嘲鍘涢惂璇茬秿閸愬秴娲栨径?); return; }
   var postId = document.getElementById("replyPostId").value;
   var text = document.getElementById("replyInput").value.trim();
-  if (!text) return alert("閸ョ偛顦叉稉宥堝厴娑撹櫣鈹?);
+  if (!text) return alert("\u56de\u590d\u4e0d\u80fd\u4e3a\u7a7a");
 
   var posts = [];
   try { posts = await loadPosts(); } catch(e) { return; }
   for (var i = 0; i < posts.length; i++) {
     if (posts[i].id === postId) {
       var replies = posts[i].replies || [];
-      replies.push({ ts: fmtNow(), body: text });
+      replies.push({ ts: fmtNow(), nick: getNick(), body: text });
       try {
-        await apiPatch("/api/posts/" + postId + "/replies", { replies: replies });
+        await apiPatch("/api/posts/" + postId + "/replies", { replies: replies, nickname: getNick(), turnstile: getTurnstileToken("reply") });
         document.getElementById("replyInput").value = "";
+        resetTurnstile("reply");
         replyClose();
         renderC();
-      } catch(e) { alert("閸ョ偛顦叉径杈Е: " + e.message); }
+      } catch(e) { alert("\u56de\u590d\u5931\u8d25: " + e.message); }
       break;
     }
   }
@@ -552,9 +558,97 @@ function communityClose() {
   document.getElementById("co").classList.remove("open");
 }
 
+// ====== 动效：滚动渐入（Apple 风格）======
+function initReveal() {
+  document.documentElement.classList.add("js-anim");
+  var sel = ".card, .tree-node, .section h2, .page-head, .article h1, .breadcrumb, .tile, .stat, .home-hero-badge, .home-hero h1, .home-hero-sub, .home-hero-cta";
+  var els = document.querySelectorAll(sel);
+  for (var i = 0; i < els.length; i++) {
+    if (els[i].hasAttribute("data-reveal")) continue;
+    els[i].setAttribute("data-reveal", "");
+    els[i].style.setProperty("--reveal-delay", ((i % 8) * 0.07).toFixed(2) + "s");
+  }
+  if (!("IntersectionObserver" in window)) {
+    for (var j = 0; j < els.length; j++) els[j].classList.add("revealed");
+    return;
+  }
+  var io = new IntersectionObserver(function(entries) {
+    for (var m = 0; m < entries.length; m++) {
+      if (entries[m].isIntersecting) {
+        entries[m].target.classList.add("revealed");
+        io.unobserve(entries[m].target);
+      }
+    }
+  }, { threshold: 0.06, rootMargin: "0px 0px -40px 0px" });
+  for (var k = 0; k < els.length; k++) io.observe(els[k]);
+}
+
+// ====== 转场幕布 + 阅读进度条 ======
+function initVeil() {
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var v = document.createElement("div");
+  v.className = "page-veil";
+  v.innerHTML = '<span class="veil-logo">计算机知识小站</span>';
+  document.body.appendChild(v);
+  // 入场：下一帧掀开幕布
+  requestAnimationFrame(function() { requestAnimationFrame(function() {
+    v.classList.add("lift");
+  }); });
+  // 出场：点击站内 .html 链接时幕布落下再跳转
+  document.addEventListener("click", function(e) {
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest ? e.target.closest("a") : null;
+    if (!a) return;
+    var href = a.getAttribute("href") || "";
+    if (!href || href.charAt(0) === "#") return;
+    if (a.target === "_blank" || a.hasAttribute("download")) return;
+    if (!/\.html($|[?#])/.test(href)) return;
+    try { if (new URL(href, location.href).origin !== location.origin) return; } catch(err) { return; }
+    e.preventDefault();
+    v.classList.remove("lift");
+    setTimeout(function() { location.href = href; }, 500);
+  });
+  // 浏览器后退（bfcache）时重新掀开
+  window.addEventListener("pageshow", function(ev) {
+    if (ev.persisted) {
+      v.classList.add("no-anim"); v.classList.remove("lift");
+      requestAnimationFrame(function() { requestAnimationFrame(function() {
+        v.classList.remove("no-anim"); v.classList.add("lift");
+      }); });
+    }
+  });
+}
+
+function initProgress() {
+  var bar = document.createElement("div");
+  bar.id = "readProgress";
+  document.body.appendChild(bar);
+  var ticking = false;
+  function upd() {
+    var h = document.documentElement;
+    var max = h.scrollHeight - window.innerHeight;
+    var y = h.scrollTop || document.body.scrollTop || 0;
+    bar.style.width = (max > 0 ? (y / max) * 100 : 0) + "%";
+    ticking = false;
+  }
+  window.addEventListener("scroll", function() {
+    if (!ticking) { ticking = true; requestAnimationFrame(upd); }
+  }, { passive: true });
+  upd();
+}
+
 // ====== INIT ======
+// 动效相关必须立刻执行（脚本在 body 末尾，此时首帧还没渲染），
+// 避免"先显示→隐藏→再淡入"的眨眼感
+initReveal();
+initVeil();
+initProgress();
+
 window.addEventListener("load", function() {
-  loadSession();
+  loadProfile();
+  loadAdminKey();
   updateUserUI();
+  renderTurnstile();
 });
 
