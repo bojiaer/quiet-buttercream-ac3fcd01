@@ -1,146 +1,41 @@
 // ====== computer-knowledge API Worker ======
-// Framework: Hono on Cloudflare Workers
-// Database: Cloudflare D1 (binding: DB)
-// Email: Resend (secret: RESEND_API_KEY)
+// 匿名社区 API：无需登录，昵称 + UID 标识 + Turnstile 人机验证
+// 数据库：Cloudflare D1 (binding: DB)
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { sign, verify } from "hono/jwt";
 
 const app = new Hono();
 
 app.use("/*", cors({
   origin: "*",
   allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-  allowHeaders: ["Content-Type", "Authorization"],
+  allowHeaders: ["Content-Type", "Authorization", "X-UID", "X-Admin-Key"],
 }));
 
 // ====== HELPERS ======
-function rnd6() {
-  return String(Math.floor(100000 + Math.random() * 900000));
-}
 
-const ADMIN_EMAILS = ["yaojinguan@qq.com"];
-
-async function requireAuth(c) {
-  const authHeader = c.req.header("Authorization") || "";
-  const token = authHeader.replace("Bearer ", "");
-  if (!token) return null;
+// Turnstile 人机验证（服务端二次校验）
+async function verifyTurnstile(c, token) {
+  if (!token) return false;
   try {
-    return await verify(token, c.env.JWT_SECRET, "HS256");
+    const body = new URLSearchParams({ secret: c.env.TURNSTILE_SECRET, response: token });
+    const r = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body });
+    const j = await r.json();
+    return !!j.success;
   } catch {
-    return null;
-  }
-}
-
-// ====== EMAIL ======
-async function sendVerificationEmail(env, to, code) {
-  const html = '<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px">'
-    + '<h2 style="color:#7c6ff7;margin-bottom:8px">电脑知识百科</h2>'
-    + '<p style="color:#333;font-size:15px">您的验证码是：</p>'
-    + '<div style="background:#0f1117;border-radius:12px;padding:24px;text-align:center;margin:20px 0">'
-    + '<span style="font-size:36px;letter-spacing:6px;color:#fff;font-weight:bold">' + code + '</span>'
-    + '</div>'
-    + '<p style="color:#888;font-size:13px">30分钟内有效。如非本人操作，请忽略。</p>'
-    + '<hr style="border:0;border-top:1px solid #eee;margin:24px 0">'
-    + '<p style="color:#aaa;font-size:12px">电脑知识百科 · 社区</p>'
-    + '</div>';
-
-  const resp = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + env.RESEND_API_KEY,
-    },
-    body: JSON.stringify({
-      from: "电脑知识百科 <onboarding@resend.dev>",
-      to: [to],
-      subject: "验证码：" + code + " - 电脑知识百科社区",
-      html: html
-    }),
-  });
-
-  if (resp.status !== 200) {
-    const txt = await resp.text();
-    throw new Error("Resend send failed: " + txt.slice(0, 300));
+    return false;
   }
 }
 
 // ====== ROUTES ======
 
-// Health check
 app.get("/api/health", (c) => c.json({ ok: true, ts: Date.now() }));
 
-// ========== AUTH ==========
-
-// POST /api/auth/send-code - Send 6-digit verification code via email
-app.post("/api/auth/send-code", async (c) => {
-  let body;
-  try { body = await c.req.json(); } catch { return c.json({ error: "Invalid JSON" }, 400); }
-  const { email } = body;
-
-  const isValidEmail = (value) => typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-  if (!isValidEmail(email)) {
-    return c.json({ error: "请提供有效的邮箱地址" }, 400);
-  }
-
-  const trimmedEmail = email.trim().toLowerCase();
-  const code = rnd6();
-  const expiresAt = new Date(Date.now() + 30 * 60_000).toISOString();
-
-  const storeRes = await c.env.DB.prepare(
-    "INSERT INTO verification_codes (email, code, expires_at) VALUES (?, ?, ?)"
-  ).bind(trimmedEmail, code, expiresAt).run();
-
-  if (!storeRes.success) {
-    return c.json({ error: "内部错误，请稍后再试" }, 500);
-  }
-
-  try {
-    await sendVerificationEmail(c.env, trimmedEmail, code);
-  } catch (e) {
-    return c.json({ error: "邮件发送失败：" + e.message }, 500);
-  }
-
-  return c.json({ success: true, message: "验证码已发送，30分钟内有效" });
-});
-
-// POST /api/auth/verify-code - Verify code and return JWT
-app.post("/api/auth/verify-code", async (c) => {
-  let body;
-  try { body = await c.req.json(); } catch { return c.json({ error: "Invalid JSON" }, 400); }
-  const { email, code } = body;
-
-  if (!email || !code) {
-    return c.json({ error: "邮箱和验证码不能为空" }, 400);
-  }
-
-  const row = await c.env.DB.prepare(
-    "SELECT * FROM verification_codes WHERE email = ? AND code = ? AND used = 0 AND expires_at > ? ORDER BY created_at DESC LIMIT 1"
-  ).bind(email.trim().toLowerCase(), code.trim(), new Date().toISOString()).first();
-
-  if (!row) {
-    return c.json({ error: "验证码错误或已过期" }, 400);
-  }
-
-  await c.env.DB.prepare("UPDATE verification_codes SET used = 1 WHERE id = ?").bind(row.id).run();
-
-  const now = Math.floor(Date.now() / 1000);
-  const token = await sign(
-    { email: row.email, sub: row.email, exp: now + 86400, iat: now },
-    c.env.JWT_SECRET,
-    "HS256"
-  );
-
-  return c.json({ token, user: { email: row.email } });
-});
-
-// ---- POSTS ----
-
-// GET /api/posts - Public read
+// GET /api/posts - 公开读取
 app.get("/api/posts", async (c) => {
   const { results } = await c.env.DB.prepare(
-    "SELECT * FROM posts ORDER BY created_at DESC"
+    "SELECT id, tag, body, replies, author, uid, created_at FROM posts ORDER BY created_at DESC"
   ).all();
   return c.json(results.map(r => ({
     ...r,
@@ -148,58 +43,88 @@ app.get("/api/posts", async (c) => {
   })));
 });
 
-// POST /api/posts - Authenticated create
+// POST /api/posts - 匿名发帖（Turnstile 校验 + 频率限制）
 app.post("/api/posts", async (c) => {
-  const user = await requireAuth(c);
-  if (!user) return c.json({ error: "请先登录" }, 401);
+  const body = await c.req.json().catch(() => null);
+  if (!body) return c.json({ error: "Invalid JSON" }, 400);
 
-  const body = await c.req.json();
-  const bodyText = String(body.body || "").slice(0, 5000);
-  const tag = String(body.tag || "").slice(0, 100);
+  const uid = c.req.header("X-UID") || "";
+  if (!uid || uid.length > 64) return c.json({ error: "缺少身份标识" }, 400);
+
+  if (!(await verifyTurnstile(c, body.turnstile))) {
+    return c.json({ error: "人机验证未通过，请重试" }, 403);
+  }
+
+  const text = String(body.body || "").trim().slice(0, 5000);
+  if (!text) return c.json({ error: "内容不能为空" }, 400);
+  const tag = String(body.tag || "").trim().slice(0, 100) || "未分类";
+  const nick = String(body.nickname || "").trim().slice(0, 30) || "匿名";
+
+  // 简单限速：同一 UID 30 秒内只能发一帖
+  const recent = await c.env.DB.prepare(
+    "SELECT id FROM posts WHERE uid = ? AND created_at > ? LIMIT 1"
+  ).bind(uid, new Date(Date.now() - 30000).toISOString()).first();
+  if (recent) return c.json({ error: "发得太快啦，休息 30 秒再试" }, 429);
+
   const id = crypto.randomUUID();
   const createdAt = new Date().toISOString();
-
   const res = await c.env.DB.prepare(
-    "INSERT INTO posts (id, tag, body, replies, author_email, created_at) VALUES (?, ?, ?, ?, ?, ?)"
-  ).bind(id, tag, bodyText, JSON.stringify(body.replies || []), user.email, createdAt).run();
+    "INSERT INTO posts (id, tag, body, replies, author, uid, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ).bind(id, tag, text, "[]", nick, uid, createdAt).run();
 
   if (!res.success) return c.json({ error: "发布失败" }, 500);
-  return c.json({ id, tag, body: bodyText, replies: body.replies || [], author_email: user.email, created_at: createdAt }, 201);
+  return c.json({ id, tag, body: text, replies: [], author: nick, created_at: createdAt }, 201);
 });
 
-// PATCH /api/posts/:id/replies - Authenticated update
+// PATCH /api/posts/:id/replies - 匿名回帖（Turnstile 校验）
 app.patch("/api/posts/:id/replies", async (c) => {
-  const user = await requireAuth(c);
-  if (!user) return c.json({ error: "请先登录" }, 401);
+  const body = await c.req.json().catch(() => null);
+  if (!body) return c.json({ error: "Invalid JSON" }, 400);
 
-  const { id } = c.req.param();
-  const body = await c.req.json();
+  if (!(await verifyTurnstile(c, body.turnstile))) {
+    return c.json({ error: "人机验证未通过，请重试" }, 403);
+  }
+
+  const raw = Array.isArray(body.replies) ? body.replies.slice(-200) : [];
+  const clean = raw.map(r => ({
+    ts: String((r && r.ts) || "").slice(0, 30),
+    nick: String((r && r.nick) || "匿名").slice(0, 30),
+    body: String((r && r.body) || "").slice(0, 1000),
+  }));
+
   const res = await c.env.DB.prepare(
     "UPDATE posts SET replies = ? WHERE id = ?"
-  ).bind(JSON.stringify(body.replies || []), id).run();
+  ).bind(JSON.stringify(clean), c.req.param("id")).run();
 
   return c.json({ success: res.success }, res.success ? 200 : 500);
 });
 
-// DELETE /api/posts/:id - Admin can delete any; users only their own
+// DELETE /api/posts/:id - 管理员可删任何帖；普通用户只能删自己的（X-UID 匹配）
 app.delete("/api/posts/:id", async (c) => {
-  const user = await requireAuth(c);
-  if (!user) return c.json({ error: "请先登录" }, 401);
+  const id = c.req.param("id");
 
-  const { id } = c.req.param();
-  const isAdmin = ADMIN_EMAILS.includes(user.email);
-
-  if (!isAdmin) {
-    const row = await c.env.DB.prepare(
-      "SELECT id FROM posts WHERE id = ? AND author_email = ? LIMIT 1"
-    ).bind(id, user.email).first();
-    if (!row) {
-      return c.json({ error: "只能删除自己的帖子" }, 403);
-    }
+  const adminKey = c.req.header("X-Admin-Key") || "";
+  if (c.env.ADMIN_KEY && adminKey && adminKey === c.env.ADMIN_KEY) {
+    await c.env.DB.prepare("DELETE FROM posts WHERE id = ?").bind(id).run();
+    return c.json({ success: true, by: "admin" });
   }
+
+  const uid = c.req.header("X-UID") || "";
+  if (!uid) return c.json({ error: "缺少身份标识" }, 401);
+
+  const row = await c.env.DB.prepare(
+    "SELECT id FROM posts WHERE id = ? AND uid = ? LIMIT 1"
+  ).bind(id, uid).first();
+  if (!row) return c.json({ error: "只能删除自己的帖子" }, 403);
 
   await c.env.DB.prepare("DELETE FROM posts WHERE id = ?").bind(id).run();
   return c.json({ success: true });
+});
+
+// GET /api/admin/check - 校验管理员密钥是否正确
+app.get("/api/admin/check", (c) => {
+  const adminKey = c.req.header("X-Admin-Key") || "";
+  return c.json({ admin: !!(c.env.ADMIN_KEY && adminKey && adminKey === c.env.ADMIN_KEY) });
 });
 
 export default app;
