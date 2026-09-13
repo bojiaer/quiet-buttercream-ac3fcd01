@@ -1,16 +1,13 @@
 {
   "name": "computer-knowledge",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "电脑知识百科 - 静态站 + Cloudflare Worker API",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node dev-server.js",
+    "deploy:worker": "cd workers && wrangler deploy"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
-  "devDependencies": {
-    "vercel": "^57.0.0"
-  }
+  "type": "commonjs"
 }
