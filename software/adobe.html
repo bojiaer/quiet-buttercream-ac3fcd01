@@ -1,55 +1,47 @@
 <!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Adobe 创意套件 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+<title>GenP 与 Adobe 套件 - 计算机知识小站</title><link rel="stylesheet" href="../css/global.css">
 </head><body>
 <header class="topbar"><div class="container">
-  <a href="../index.html" class="logo">电脑知识百科</a>
+  <a href="../index.html" class="logo">计算机知识小站</a>
   <nav class="nav"><a href="../index.html">首页</a><a href="../hardware/index.html">硬件</a><a href="../system/index.html">系统</a><a href="index.html" class="active">软件</a></nav>
   <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
 </div></header>
-<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">软件</a> / <span>Adobe 套件</span></div></div>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">软件</a> / <span>GenP 与 Adobe</span></div></div>
 <article class="article">
-<h1>Adobe 创意套件 — 行业标准软件组</h1>
+<h1>GenP — Adobe 套件的开源补丁项目</h1>
 
 <ul class="tree">
 <li class="tree-node open">
-  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>Photoshop (Ps) — 图像编辑</div>
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>GenP 是什么</div>
   <div class="tree-children">
-    <div class="tree-card"><h4>核心作用</h4><p>基于图层的位图（raster image）操作：合成图片、背景抠图、修图、网页/UI 原型画框。每个图层可以独立隐藏——这是精髓。</p></div>
+    <div class="tree-card"><p>GenP 是 GitHub 上的一个开源补丁工具（Community-led 项目），针对 Adobe Creative Cloud 全家桶——Photoshop、Premiere、After Effects、Illustrator 等都能覆盖。它的作用是让这些软件在本地不依赖官方订阅授权即可完整使用，对想学创意设计但没有订阅预算的学生群体影响很大。</p></div>
   </div>
 </li>
-<li class="tree-node">
-  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>Illustrator (Ai) — 矢量图形</div>
+
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>使用前必须知道的三件事</div>
   <div class="tree-children">
-    <div class="tree-card"><h4>核心作用</h4><p>制作可以无限缩放而不失真的 Logo 和宣传画。和 Photoshop 最大区别是基于路径/数学线而图象素的。常与 AE/Pr 互换。</p></div>
+    <div class="tree-card"><h4>1. 版本必须匹配</h4><p>GenP 的每个版本只支持特定版本的 Adobe 软件（看 Releases 页面的说明）。Adobe 软件版本更新后，旧补丁通常会失效，需要等 GenP 更新或锁定 Adobe 的自动更新。</p></div>
+    <div class="tree-card"><h4>2. 只从 GitHub 官方仓库获取</h4><p>GenP 只通过其 GitHub 仓库发布。网上第三方"下载站"经常把补丁和木马打包在一起（银狐、挖矿马的重灾区），不要碰。</p></div>
+    <div class="tree-card"><h4>3. 杀毒软件会报毒</h4><p>补丁的工作方式决定了它会被杀软标记。这是预期行为，但前提是你确认拿到的是官方仓库的原版文件。</p></div>
   </div>
 </li>
+
 <li class="tree-node">
-  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>Premiere Pro (Pr) — 视频剪辑</div>
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>对 Adobe 使用方式的改变</div>
   <div class="tree-children">
-    <div class="tree-card"><h4>核心作用</h4><p>多轨时间线剪辑——把素材、音轨、转场融合到一个完整影视上。重点在同时观测多个应用层时间线条。</p></div>
+    <div class="tree-card"><table><tr><th>方面</th><th>官方订阅</th><th>GenP 补丁</th></tr><tr><td>费用</td><td>每月订阅，价格不低</td><td>免费</td></tr><tr><td>账号</td><td>必须登录 Adobe 账号</td><td>不依赖许可证登录</td></tr><tr><td>更新</td><td>自动更新</td><td>更新会破坏补丁，需锁定</td></tr><tr><td>云服务</td><td>云文档 / 字体库 / AI 功能</td><td>部分云端功能不可用</td></tr></table></div>
   </div>
 </li>
+
 <li class="tree-node">
-  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>After Effects (AE) — 动态图形 & VFX</div>
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>项目地址</div>
   <div class="tree-children">
-    <div class="tree-card"><h4>核心作用</h4><p>制作粒子、涟漪、形变和广告特效。与 Pr 配套形成「剪辑Ur 拍摄→导入→剪辑→导出特效合成 给予动效」；渲染耗时夸张可用 GPU 加速。</p></div>
-  </div>
-</li>
-<li class="tree-node">
-  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>其他常用成员</div>
-  <div class="tree-children">
-    <div class="tree-card"><table><tr><th>Lightroom</th><td>专业照片批量调色/RAW 处理</td></tr><tr><th>InDesign</th><td>杂志/书籍排版</td></tr><tr><th>Audition</th><td>专业音频——多轨录制/消除噪音</td></tr><tr><th>Media Encoder</th><td>后台批量渲染、多规格导出。</td></tr></table></div>
+    <div class="tree-card"><p>🔗 <a target="_blank" href="https://github.com/SpoinkyNL/GenP-3">github.com/SpoinkyNL/GenP-3</a>（看 Releases 页下载、看说明确认支持的 Adobe 版本）</p></div>
   </div>
 </li>
 </ul>
 </article>
-<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<div class="footer"><div class="container">计算机知识小站 · 个人知识仓库 · 仅供参考</div></div>
 <script src="../js/app.js"></script>
 </body></html>
-
-
-
-
-
-
-
