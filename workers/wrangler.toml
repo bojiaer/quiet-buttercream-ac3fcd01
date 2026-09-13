@@ -7,6 +7,11 @@ compatibility_flags = ["nodejs_compat"]
 [observability]
 enabled = true
 
-[vars]
-SUPABASE_URL = "https://qmxjodfvzuvxvxmkjhju.supabase.co"
-JWT_SECRET = "ck-jwt-secret-2026-kb"
+[[d1_databases]]
+binding = "DB"
+database_name = "computer-knowledge-api-db"
+database_id = "96acc4e2-121d-433b-bc00-e7a1fa4cbc46"
+migrations_dir = "migrations"
+
+# Secrets (set via: npx wrangler secret put JWT_SECRET / RESEND_API_KEY)
+# Do NOT put real keys in this file.
