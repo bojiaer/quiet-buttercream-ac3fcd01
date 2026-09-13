@@ -1,52 +1,51 @@
 <!DOCTYPE html><html lang="zh"><head><meta charset="UTF-8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0f1117"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Python 编程语言 - 电脑知识百科</title><link rel="stylesheet" href="../css/global.css">
+<title>Python 依赖 - 计算机知识小站</title><link rel="stylesheet" href="../css/global.css">
 </head><body>
 <header class="topbar"><div class="container">
-  <a href="../index.html" class="logo">电脑知识百科</a>
+  <a href="../index.html" class="logo">计算机知识小站</a>
   <nav class="nav"><a href="../index.html">首页</a><a href="../hardware/index.html">硬件</a><a href="../system/index.html">系统</a><a href="index.html" class="active">软件</a></nav>
   <div class="search-wrapper"><span class="sicon">⌕</span><input type="text" id="searchInput" placeholder="搜索..."><div class="search-results" id="searchResults"></div></div>
 </div></header>
-<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">软件</a> / <span>Python</span></div></div>
+<div class="container"><div class="breadcrumb"><a href="../index.html">首页</a> / <a href="index.html">软件</a> / <span>Python 依赖</span></div></div>
 <article class="article">
-<h1>Python — 编程语言中的万能工具</h1>
+<h1>Python 依赖 — 装什么工具都绕不开的地基</h1>
+
 <ul class="tree">
-
 <li class="tree-node open">
-  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>Python 是什么</div>
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>为什么它重要</div>
   <div class="tree-children">
-    <div class="tree-card"><p>Python 是一种被广泛使用的高级编程语言，语法特别简单——就像用英语写指令。它不是要你成为程序员才装，很多常用软件（OBS 的脚本扩展、Blender 的插件系统、Stable Diffusion 的自动部署）都需要电脑装了 Python 才能跑。</p></div>
-  </div>
-</li>
-
-<li class="tree-node open">
-  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>为什么需要 Python（依赖层面）</div>
-  <div class="tree-children">
+    <div class="tree-card"><p>你不需要会写 Python，但你的电脑大概率需要装它。<strong>大量常用工具把 Python 当作运行地基（依赖）</strong>——没有它，这些软件装完根本跑不起来。这是普通用户接触 Python 的最主要原因。</p></div>
     <div class="tree-card">
-      <h4>很多厉害的工具依赖它</h4>
-      <table><tr><th>工具 / 软件</th><th>需要 Python 的原因</th></tr>
-      <tr><td>Stable Diffusion / ComfyUI</td><td>底层用 Python 创建一个本地 Web 服务器与 GPU 交互</td></tr>
-      <tr><td>OBS 高级脚本</td><td>几乎所有动态媒体控制脚本都是 .py 格式</td></tr>
-      <tr><td>自动脚本化推流 / pip 自动数据</td><td>需要 Python 来操作流程</td></tr>
-      <tr><td>很多游戏外挂/提取文件工具</td><td>subprocess 调的多数是 Python</td></tr>
-    </table>
+      <h4>哪些工具依赖 Python</h4>
+      <table><tr><th>工具 / 软件</th><th>依赖 Python 的原因</th></tr>
+      <tr><td>Stable Diffusion WebUI / ComfyUI</td><td>整个程序就是 Python 写的，本地起 Web 服务跑 GPU 推理</td></tr>
+      <tr><td>OBS 高级脚本</td><td>动态控制脚本几乎都是 .py 文件</td></tr>
+      <tr><td>Blender 插件</td><td>插件系统基于 Python</td></tr>
+      <tr><td>各类开源小工具 / 自动化脚本</td><td>GitHub 上的工具十有八九要 Python 环境才能运行</td></tr>
+      </table>
     </div>
   </div>
 </li>
 
-<li class="tree-node">
-  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>怎么获得</div>
+<li class="tree-node open">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>安装（一次搞定）</div>
   <div class="tree-children">
-    <div class="tree-card"><h4>下载安装包</h4><p>从 Python 官网 <a target="_blank" href="https://www.python.org/downloads/">https://www.python.org/downloads/</a> 下载 Python 3.X 最新版本 → 安装时记得勾选 <code>Add Python to PATH</code></p></div>
-    <div class="tree-card"><h4>装好后验证</h4><p>打开命令行 -> 输入 <code>python --version</code>，看到版本号即成功。</p></div>
-    <div class="red-alert"><strong>一个注意: </strong>如果把 Python 安装在路径含空格的目录里，很多依赖工具会报错——用户文件夹<empty path 包含空格会导致某些 Auto 工具无法识别。建议安装在 C:\python3 这种纯路径下。</div>
+    <div class="tree-card"><h4>下载</h4><p>官网 <a target="_blank" href="https://www.python.org/downloads/">python.org/downloads</a> 下载最新的 Python 3.x。</p></div>
+    <div class="tree-card"><h4>安装时必勾</h4><p><code>Add Python to PATH</code>——不勾的话命令行里认不到 python 命令，后面所有工具都会报错。</p></div>
+    <div class="tree-card"><h4>验证</h4><p>命令行输入 <code>python --version</code>，显示版本号即成功；再输入 <code>pip --version</code> 确认包管理器也就位。</p></div>
+    <div class="red-alert"><strong>注意：</strong>不要安装在路径带空格或中文的目录里（比如"新建文件夹"），很多依赖工具会直接报错。默认路径或 <code>C:\Python3x</code> 最稳。</div>
+  </div>
+</li>
+
+<li class="tree-node">
+  <div class="tree-label" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')"><span class="tree-toggle">▶</span>pip 与换源加速</div>
+  <div class="tree-children">
+    <div class="tree-card"><h4>pip 是什么</h4><p>Python 的"应用商店"——工具跑起来前要装的一堆依赖包都用它安装：<code>pip install 包名</code>。Stable Diffusion 一键启动脚本第一次跑的时候，自动帮你执行的就是这个。</p></div>
+    <div class="tree-card"><h4>国内换源（速度差 10 倍以上）</h4><p>官方源在国内很慢，用清华源：<br><code>pip install 包名 -i https://pypi.tuna.tsinghua.edu.cn/simple</code><br>设为默认：<br><code>pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple</code></p></div>
   </div>
 </li>
 </ul>
 </article>
-<div class="footer"><div class="container">电脑知识百科 · 个人知识仓库 · 仅供参考</div></div>
+<div class="footer"><div class="container">计算机知识小站 · 个人知识仓库 · 仅供参考</div></div>
 <script src="../js/app.js"></script>
 </body></html>
-
-
-
-
